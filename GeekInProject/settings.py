@@ -25,11 +25,12 @@ SECRET_KEY = 'k%5&k_pz$9=_@0x3vkmi5&bw*mme*o^yf42iu$w5v6e71dwog$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['54.187.138.210']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
 INSTALLED_APPS = (
+    'GeekInRest',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -85,7 +86,7 @@ DATABASES = {
                 'ENGINE': 'django.db.backends.mysql',
                 'NAME': 'geek_in_db',
                 'USER': 'root',
-                'PASSWORD': 'root',
+                'PASSWORD': 'superzala',
                 'HOST': 'localhost',
                 'PORT': '3306',
             }

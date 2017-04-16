@@ -10,6 +10,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+import datetime
 
 
 class Comments(models.Model):
@@ -17,10 +18,10 @@ class Comments(models.Model):
     email = models.CharField(db_column='Email', max_length=100, blank=True, null=True)  # Field name made lowercase.
     pid = models.ForeignKey('Posts', db_column='Pid', blank=True, null=True)  # Field name made lowercase.
     content = models.TextField(db_column='Content', blank=True, null=True)  # Field name made lowercase.
-    date = models.DateTimeField(db_column='Date', blank=True, null=True)  # Field name made lowercase.
+    date = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Comments'
 
 
@@ -28,9 +29,9 @@ class Following(models.Model):
     fid = models.IntegerField(db_column='Fid', primary_key=True)  # Field name made lowercase.
     follower = models.CharField(db_column='Follower', max_length=100, blank=True, null=True)  # Field name made lowercase.
     followee = models.CharField(db_column='Followee', max_length=100, blank=True, null=True)  # Field name made lowercase.
-
+    timestamp = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now,blank=True)
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Following'
 
 
@@ -38,9 +39,10 @@ class Likes(models.Model):
     lid = models.AutoField(db_column='Lid', primary_key=True)  # Field name made lowercase.
     pid = models.IntegerField(db_column='Pid', blank=True, null=True)  # Field name made lowercase.
     email = models.CharField(db_column='Email', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    timestamp = models.DateTimeField(db_column='TimeStamp', default=datetime.datetime.now,blank=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Likes'
 
 
@@ -50,7 +52,7 @@ class PostTags(models.Model):
     tid = models.ForeignKey('Tags', db_column='Tid', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Post_Tags'
 
 
@@ -60,10 +62,10 @@ class Posts(models.Model):
     content = models.TextField(db_column='Content', blank=True, null=True)  # Field name made lowercase.
     photo = models.CharField(db_column='Photo', max_length=100, blank=True, null=True)  # Field name made lowercase.
     title = models.CharField(db_column='Title', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    date = models.DateTimeField(db_column='Date', blank=True, null=True)  # Field name made lowercase.
+    date = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now,  blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Posts'
 
 
@@ -72,7 +74,7 @@ class Tags(models.Model):
     tag = models.CharField(db_column='Tag', max_length=50, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Tags'
 
 
@@ -82,7 +84,7 @@ class UserTags(models.Model):
     tid = models.IntegerField(db_column='Tid', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'User_Tags'
 
 
@@ -93,15 +95,21 @@ class Users(models.Model):
     username = models.CharField(db_column='Username', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Users'
 
+class Notification(models.Model):
+    auto_increment_id = models.AutoField(primary_key=True)
+    HostEmail = models.ForeignKey(Users,null=True,related_name='host')
+    GuestEmail = models.ForeignKey(Users,null=True,related_name='guest')
+    Pid = models.ForeignKey(Posts)
+    type = models.IntegerField()
 
-class DjangoMigrations(models.Model):
-    app = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    applied = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'django_migrations'
+# class DjangoMigrations(models.Model):
+#     app = models.CharField(max_length=255)
+#     name = models.CharField(max_length=255)
+#     applied = models.DateTimeField()
+#
+#     class Meta:
+#         managed = True
+#         db_table = 'django_migrations'
