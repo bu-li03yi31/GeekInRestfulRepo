@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from models import Users, Posts
+from GeekInRest.models import Users, Posts
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
