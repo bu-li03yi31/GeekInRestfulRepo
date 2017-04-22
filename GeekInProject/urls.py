@@ -23,5 +23,7 @@ router.register(r'users', views.UserViewSet)
 router.register(r'posts', views.PostViewSet)
 
 urlpatterns = [
-    url(r'^', include(router.urls))
+    url(r'^', include(router.urls)),
+    url(r'^login/', views.login),
+    url(r'^newpost/', views.newpost),
 ]
