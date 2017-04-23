@@ -56,19 +56,6 @@ class PostTags(models.Model):
         db_table = 'Post_Tags'
 
 
-class Posts(models.Model):
-    pid = models.AutoField(db_column='Pid', primary_key=True)  # Field name made lowercase.
-    email = models.CharField(db_column='Email', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    content = models.TextField(db_column='Content', blank=True, null=True)  # Field name made lowercase.
-    photo = models.CharField(db_column='Photo', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    title = models.CharField(db_column='Title', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    date = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now,  blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        managed = True
-        db_table = 'Posts'
-
-
 class Tags(models.Model):
     tid = models.AutoField(db_column='Tid', primary_key=True)  # Field name made lowercase.
     tag = models.CharField(db_column='Tag', max_length=50, blank=True, null=True)  # Field name made lowercase.
@@ -77,12 +64,12 @@ class Tags(models.Model):
         managed = True
         db_table = 'Tags'
 
-
+#TID FOREIGN KEY
 class UserTags(models.Model):
     utid = models.IntegerField(db_column='UTid', primary_key=True)  # Field name made lowercase.
     email = models.ForeignKey('Users', db_column='Email', blank=True, null=True)  # Field name made lowercase.
-    tid = models.IntegerField(db_column='Tid', blank=True, null=True)  # Field name made lowercase.
-
+    #tid = models.IntegerField(db_column='Tid', blank=True, null=True)  # Field name made lowercase.
+    tid = models.ForeignKey(Tags)
     class Meta:
         managed = True
         db_table = 'User_Tags'
@@ -97,6 +84,24 @@ class Users(models.Model):
     class Meta:
         managed = True
         db_table = 'Users'
+
+
+
+class Posts(models.Model):
+    pid = models.AutoField(db_column='Pid', primary_key=True)  # Field name made lowercase.
+    #email should be foreign key
+    #email = models.CharField(db_column='Email', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    email = models.ForeignKey(Users)
+    content = models.TextField(db_column='Content', blank=True, null=True)  # Field name made lowercase.
+    photo = models.CharField(db_column='Photo', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    title = models.CharField(db_column='Title', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    date = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now,  blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = True
+        db_table = 'Posts'
+
+
 
 class Notification(models.Model):
     auto_increment_id = models.AutoField(primary_key=True)
