@@ -25,5 +25,5 @@ router.register(r'posts', views.PostViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^login/', views.login),
-    url(r'^newpost/', views.newpost),
+    url(r'^newpost/', views.createNewPost),
 ]

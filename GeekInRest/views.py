@@ -44,8 +44,9 @@ def login(request):
     else:
         return JsonResponse({'result': False})
 
+#Sign up a new user
 @csrf_exempt
-def create(request):
+def createUser(request):
     json_str = ((request.body).decode('utf-8'))
     body = json.loads(json_str)
     email = body['email']
@@ -81,17 +82,9 @@ def user_tags(request):
         t.save()
     return JsonResponse({'result': "true"})
 
+#Create new post
 @csrf_exempt
-def newpost1(request):
-    json_str = ((request.body).decode('utf-8'))
-    body = json.loads(json_str)
-    # print(time.strftime("%y_%m_%d_%H_%M_%S_%f"))
-    # print(datetime.now().strftime("%y_%m_%d_%H_%M_%S_%f"))
-    print(os.path.abspath("settings.py"))
-    return JsonResponse({'result': "true"})
-
-@csrf_exempt
-def newpost(request):
+def createNewPost(request):
     json_str = ((request.body).decode('utf-8'))
     body = json.loads(json_str)
 
