@@ -1,3 +1,6 @@
+#Created by Yi Li and Yiteng Xu in 2017/03/23
+#Modified by Yi Li, Yiteng Xu and Desheng Zhang
+
 from django.shortcuts import render
 from GeekInRest.models import Users, Posts, UserTags, Tags
 from GeekInRest.serializers import UserSerializer, PostSerializer
