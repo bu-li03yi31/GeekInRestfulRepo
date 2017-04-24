@@ -27,4 +27,7 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^login/', views.login),
     url(r'^newpost/', views.createNewPost),
+    url(r'^addLike/', views.addLike),
+    url(r'^addFollowing/', userViews.addFollowing),
+    url(r'^profile/', userViews.getProfile)
 ]
