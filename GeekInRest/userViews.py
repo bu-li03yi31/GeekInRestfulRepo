@@ -21,9 +21,15 @@ from django.utils import timezone
 #Add a following relationship
 @csrf_exempt
 def addFollowing(request):
-    json_str = ((request.body).decode('utf-8'))
-    body = json.loads(json_str)
-
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
+        following = Following(follower=body['follower'], followee=body['followee'], timestamp=str_time)
+        following.save()
+        return JsonResponse({'result': "true"})
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in addFollowing: ' + str(e)})
 
 #Sign up a new user
 @csrf_exempt
