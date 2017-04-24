@@ -2,7 +2,7 @@
 #Modified by Yi Li, Yiteng Xu and Desheng Zhang
 
 from django.shortcuts import render
-from GeekInRest.models import Users, Posts, UserTags, Tags
+from GeekInRest.models import Users, Posts, UserTags, Tags, Likes
 from GeekInRest.serializers import UserSerializer, PostSerializer
 from rest_framework import viewsets
 import time
@@ -79,3 +79,17 @@ def createNewPost(request):
 
     data.save()
     return JsonResponse({'result': "true"})
+
+#add like to a post
+@csrf_exempt
+def addLike(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
+        like = Likes(pid=int(body['Pid']), email=body['email'], timestamp=str_time)
+        like.save()
+        return JsonResponse({'result': "true"})
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in addLike: ' + str(e)})
+        

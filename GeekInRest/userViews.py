@@ -3,7 +3,7 @@
 #A view where contains all user-relate interfaces (user follow, fetch user profiles, get followers, etc)
 
 from django.shortcuts import render
-from GeekInRest.models import Users, Posts, UserTags, Tags
+from GeekInRest.models import Users, Posts, UserTags, Tags, Following
 from GeekInRest.serializers import UserSerializer, PostSerializer
 from rest_framework import viewsets
 import time
@@ -15,7 +15,6 @@ import os
 import base64
 
 from django.utils import timezone
-
 
 
 #Add a following relationship
@@ -53,3 +52,5 @@ def createUser(request):
         data = Users(email=body["email"],password=body["password"],photo=filedir + email + ".jpg",username=body["username"])
         data.save()
         return JsonResponse({'result': "true"})
+
+
