@@ -14,6 +14,7 @@ from datetime import datetime
 import os
 import base64
 from django.utils import timezone
+from django.db.models import Count
 
 
 #Add a following relationship
@@ -36,14 +37,11 @@ def getProfile(request):
         body = json.loads(json_str)
         user = body['email']
         #get follower number
-        follower_query=Following.objects.filter(followee=user).annotate(num_followers=Count('Follower',distinct=True))
-        countFollower = follower_query.num_followers
+        countFollower=Following.objects.filter(followee=user).count() 
         #get following number
-        followee_query=Following.objects.filter(follower=user).annotate(num_followees=Count('Followee',distinct=True))
-        countFollowee = followee_query.num_followees
+        countFollowee=Following.objects.filter(follower=user).count()
         #get posts number
-        post_query=Posts.objects.filter(email=user).annotate(num_posts=Count('Pid', distinct=True))
-        countPosts=post_query.num_posts
+        countPosts=Posts.objects.filter(email=user).count()
         return JsonResponse({'result': "true", "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts)})
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in getProfile: ' + str(e)})
