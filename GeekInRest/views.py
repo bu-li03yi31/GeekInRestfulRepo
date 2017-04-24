@@ -2,7 +2,7 @@
 #Modified by Yi Li, Yiteng Xu and Desheng Zhang
 
 from django.shortcuts import render
-from GeekInRest.models import Users, Posts, UserTags, Tags, Likes, Posts
+from GeekInRest.models import Users, Posts, UserTags, Tags, Likes, Posts, Comments
 from GeekInRest.serializers import UserSerializer, PostSerializer
 from rest_framework import viewsets
 import time
@@ -86,9 +86,23 @@ def addLike(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        like = Likes(pid=int(body['Pid']), email=body['email'])
+        like = Likes(pid=int(body['pid']), email=body['email'])
         like.save()
         return JsonResponse({'result': "true"})
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in addLike: ' + str(e)})
         
+#add comment to a post
+@csrf_exempt
+def addComment(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        #Since Pid in Comments is foreign key of Pid in Posts,
+        #pid in comment object must be given a Posts object
+        post = Posts.objects.get(pid=int(body['pid']))
+        comment = Comments(email=body['email'], content=body['content'], pid=post)
+        comment.save()
+        return JsonResponse({'result': "true"})
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in addComment: ' + str(e)})
