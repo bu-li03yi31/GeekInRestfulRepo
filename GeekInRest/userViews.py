@@ -13,7 +13,6 @@ from django.http import JsonResponse
 from datetime import datetime
 import os
 import base64
-
 from django.utils import timezone
 
 
@@ -23,8 +22,7 @@ def addFollowing(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
-        following = Following(follower=body['follower'], followee=body['followee'], timestamp=str_time)
+        following = Following(follower=body['follower'], followee=body['followee'])
         following.save()
         return JsonResponse({'result': "true"})
     except Exception as e:

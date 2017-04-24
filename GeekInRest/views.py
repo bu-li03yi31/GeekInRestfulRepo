@@ -86,8 +86,7 @@ def addLike(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
-        like = Likes(pid=int(body['Pid']), email=body['email'], timestamp=str_time)
+        like = Likes(pid=int(body['Pid']), email=body['email'])
         like.save()
         return JsonResponse({'result': "true"})
     except Exception as e:
