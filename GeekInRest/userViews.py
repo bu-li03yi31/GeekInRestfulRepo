@@ -3,7 +3,7 @@
 #A view where contains all user-relate interfaces (user follow, fetch user profiles, get followers, etc)
 
 from django.shortcuts import render
-from GeekInRest.models import Users, Posts, UserTags, Tags, Following
+from GeekInRest.models import Users, Posts, UserTags, Tags, Following, Posts
 from GeekInRest.serializers import UserSerializer, PostSerializer
 from rest_framework import viewsets
 import time
@@ -30,6 +30,26 @@ def addFollowing(request):
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in addFollowing: ' + str(e)})
 
+#Get user profile
+@csrf_exempt
+def getProfile(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        user = body['email']
+        #get follower number
+        follower_query=Following.objects.filter(followee=user).annotate(num_followers=Count('Follower',distinct=True))
+        countFollower = follower_query.num_followers
+        #get following number
+        followee_query=Following.objects.filter(follower=user).annotate(num_followees=Count('Followee',distinct=True))
+        countFollowee = followee_query.num_followees
+        #get posts number
+        post_query=Posts.objects.filter(email=user).annotate(num_posts=Count('Pid', distinct=True))
+        countPosts=post_query.num_posts
+        return JsonResponse({'result': "true", "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts)})
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in getProfile: ' + str(e)})
+    
 #Sign up a new user
 @csrf_exempt
 def createUser(request):

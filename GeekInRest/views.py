@@ -2,7 +2,7 @@
 #Modified by Yi Li, Yiteng Xu and Desheng Zhang
 
 from django.shortcuts import render
-from GeekInRest.models import Users, Posts, UserTags, Tags, Likes
+from GeekInRest.models import Users, Posts, UserTags, Tags, Likes, Posts
 from GeekInRest.serializers import UserSerializer, PostSerializer
 from rest_framework import viewsets
 import time
