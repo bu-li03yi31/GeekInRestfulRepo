@@ -87,6 +87,6 @@ def getFollowers(request):
         for row in rows:
             result.append(dict(zip(keys,row)))
         json_object = {'data': result, 'result': "true"}
-        return JsonResponse(json_object, safe=False)
+        return JsonResponse(json_object)
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in getFollowers: ' + str(e)})
