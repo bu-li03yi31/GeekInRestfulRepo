@@ -106,3 +106,5 @@ def addComment(request):
         return JsonResponse({'result': "true"})
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in addComment: ' + str(e)})
+
+

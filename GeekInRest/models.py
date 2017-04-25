@@ -24,17 +24,6 @@ class Comments(models.Model):
         managed = True
         db_table = 'Comments'
 
-
-class Following(models.Model):
-    fid = models.IntegerField(db_column='Fid', primary_key=True)  # Field name made lowercase.
-    follower = models.CharField(db_column='Follower', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    followee = models.CharField(db_column='Followee', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    timestamp = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now,blank=True)
-    class Meta:
-        managed = True
-        db_table = 'Following'
-
-
 class Likes(models.Model):
     lid = models.AutoField(db_column='Lid', primary_key=True)  # Field name made lowercase.
     pid = models.IntegerField(db_column='Pid', blank=True, null=True)  # Field name made lowercase.
@@ -80,12 +69,21 @@ class Users(models.Model):
     photo = models.CharField(db_column='Photo', max_length=100, blank=True, null=True)  # Field name made lowercase.
     password = models.CharField(db_column='Password', max_length=20, blank=True, null=True)  # Field name made lowercase.
     username = models.CharField(db_column='Username', max_length=100, blank=True, null=True)  # Field name made lowercase.
-
+    
     class Meta:
         managed = True
         db_table = 'Users'
 
-
+class Following(models.Model):
+    fid = models.IntegerField(db_column='Fid', primary_key=True)  # Field name made lowercase.
+    follower = models.ForeignKey('Users', related_name='user1', db_column='Follower')
+    followee = models.ForeignKey('Users', related_name='user2', db_column='Followee')
+    #follower = models.CharField(db_column='Follower', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    #followee = models.CharField(db_column='Followee', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    timestamp = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now,blank=True)
+    class Meta:
+        managed = True
+        db_table = 'Following'
 
 class Posts(models.Model):
     pid = models.AutoField(db_column='Pid', primary_key=True)  # Field name made lowercase.

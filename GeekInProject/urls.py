@@ -30,5 +30,6 @@ urlpatterns = [
     url(r'^addLike/', views.addLike),
     url(r'^addFollowing/', userViews.addFollowing),
     url(r'^profile/', userViews.getProfile),
-    url(r'^addComment/', views.addComment)
+    url(r'^addComment/', views.addComment),
+    url(r'^getFollowers/', userViews.getFollowers)
 ]

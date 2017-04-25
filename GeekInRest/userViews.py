@@ -15,6 +15,8 @@ import os
 import base64
 from django.utils import timezone
 from django.db.models import Count
+from django.db import connection
+from django.core import serializers
 
 
 #Add a following relationship
@@ -23,7 +25,9 @@ def addFollowing(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        following = Following(follower=body['follower'], followee=body['followee'])
+        fer = Users.objects.get(email=body['follower'])
+        fee = Users.objects.get(email=body['followee'])
+        following = Following(follower=fer, followee=fee)
         following.save()
         return JsonResponse({'result': "true"})
     except Exception as e:
@@ -69,4 +73,20 @@ def createUser(request):
         data.save()
         return JsonResponse({'result': "true"})
 
-
+#Get all followers of one user
+@csrf_exempt
+def getFollowers(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        cursor = connection.cursor()
+        cursor.execute('select u.Photo as photo, u.Username as name from Following f, Users u where f.Follower = u.email and f.Followee = "' + body['email'] + '"')
+        rows = cursor.fetchall()
+        result = []
+        keys = ('photo','username')
+        for row in rows:
+            result.append(dict(zip(keys,row)))
+        json_object = {'data': result, 'result': "true"}
+        return JsonResponse(json_object, safe=False)
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in getFollowers: ' + str(e)})
