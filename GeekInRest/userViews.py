@@ -108,3 +108,26 @@ def getFollowers(request):
         return JsonResponse(json_object)
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in getFollowers: ' + str(e)})
+
+
+#Get Notifications
+@csrf_exempt
+def getNotifications(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        #select u2.Username, tmp.Title, tmp.Timestamp from Users u2, (select l.Email, p.Title, l.Timestamp from Users u, Posts p, Likes l where u.Email = p.Email and p.Pid = l.Pid and u.Email = 'root@163.com') as tmp where u2.Email = tmp.Email;
+        #select u2.Username, tmp.Title, tmp.Timestamp from Users u2, (select c.Email, p.Title, c.Timestamp from Users u, Posts p, Comments c where u.Email = p.Email and p.Pid = c.Pid and u.Email = 'root@163.com') as tmp where u2.Email = tmp.Email;
+        cursor.execute('select u2.Username, tmp.Title, tmp.Timestamp from Users u2, (select l.Email, p.Title, l.Timestamp from Users u, Posts p, Likes l where u.Email=p.Email and p.Pid=l.Pid and u.Email="'+body['email']+'") as tmp where u2.Email = tmp.Email')
+        rows = cursor.fetchall()
+        keys = ('username','Title','Date')
+        likes = []
+        for row in rows:
+            likes.append(dict(zip(keys,row)))
+        
+        json_object = {'likes': likes, 'result': "true"}
+        
+        return JsonResponse(json_object)
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in getNotifications: ' + str(e)})
+            
