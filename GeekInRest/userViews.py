@@ -19,6 +19,19 @@ from django.db import connection
 from django.core import serializers
 
 
+#Remove a following relationship
+@csrf_exempt
+def removeFollowing(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        fer = Users.objects.get(email=body['follower'])
+        fee = Users.objects.get(email=body['followee'])
+        Following.objects.filter(follower=fer, followee=fee).delete()
+        return JsonResponse({'result': "true"})
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in addFollowing: ' + str(e)})
+
 #Add a following relationship
 @csrf_exempt
 def addFollowing(request):
@@ -46,7 +59,12 @@ def getProfile(request):
         countFollowee=Following.objects.filter(follower=user).count()
         #get posts number
         countPosts=Posts.objects.filter(email=user).count()
-        return JsonResponse({'result': "true", "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts)})
+        if 'self' in body:
+            num_results = Following.objects.filter(follower=body['self'], followee=user).count();
+            isFollowing = num_results
+            return JsonResponse({'result': "true", "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "isFollowing": isFollowing})
+        else:
+            return JsonResponse({'result': "true", "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts)})
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in getProfile: ' + str(e)})
     

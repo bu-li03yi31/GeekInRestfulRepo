@@ -86,12 +86,27 @@ def addLike(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        like = Likes(pid=int(body['pid']), email=body['email'])
+        post = Posts.objects.get(pid=int(body['pid']))
+        user = Users.objects.get(email=body['email'])
+        like = Likes(pid=post, email=user)
         like.save()
         return JsonResponse({'result': "true"})
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in addLike: ' + str(e)})
-        
+
+#remove like to a post
+@csrf_exempt
+def removeLike(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        post = Posts.objects.get(pid=int(body['pid']))
+        user = Users.objects.get(email=body['email'])
+        Likes.objects.filter(pid=post, email=user).delete()
+        return JsonResponse({'result': "true"})
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in addLike: ' + str(e)})
+
 #add comment to a post
 @csrf_exempt
 def addComment(request):

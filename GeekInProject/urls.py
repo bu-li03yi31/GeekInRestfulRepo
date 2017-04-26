@@ -28,7 +28,9 @@ urlpatterns = [
     url(r'^login/', views.login),
     url(r'^newpost/', views.createNewPost),
     url(r'^addLike/', views.addLike),
+    url(r'^removeLike/', views.removeLike),
     url(r'^addFollowing/', userViews.addFollowing),
+    url(r'^removeFollowing/', userViews.removeFollowing),
     url(r'^profile/', userViews.getProfile),
     url(r'^addComment/', views.addComment),
     url(r'^getFollowers/', userViews.getFollowers)
