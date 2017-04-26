@@ -98,10 +98,10 @@ def getFollowers(request):
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
         cursor = connection.cursor()
-        cursor.execute('select u.Photo as photo, u.Username as name from Following f, Users u where f.Follower = u.email and f.Followee = "' + body['email'] + '"')
+        cursor.execute('select u.Photo, u.Username, u.Email from Following f, Users u where f.Follower = u.email and f.Followee = "' + body['email'] + '"')
         rows = cursor.fetchall()
         result = []
-        keys = ('photo','username')
+        keys = ('photo','username', 'email')
         for row in rows:
             result.append(dict(zip(keys,row)))
         json_object = {'data': result, 'result': "true"}

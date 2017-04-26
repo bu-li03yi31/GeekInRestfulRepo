@@ -9,6 +9,7 @@ import time
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.db import connection
 from datetime import datetime
 import os
 import base64
@@ -123,3 +124,22 @@ def addComment(request):
         return JsonResponse({'result': "false", 'message': 'error in addComment: ' + str(e)})
 
 
+#get comments of a post
+@csrf_exempt
+def getComments(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        pid=int(body['pid'])
+        cursor = connection.cursor()
+        cursor.execute('select p.Pid, u.Username, u.Photo, c.Email, c.Content, DATE_FORMAT(c.TimeStamp,"%m-%d %H:%i") from Users u, Comments c, Posts p where p.Pid=c.Pid and u.Email=c.Email and p.Pid=' + str(pid))
+        rows = cursor.fetchall()
+        keys = ('pid','username','photo','email','content','date')
+        res = []
+        for row in rows:
+            res.append(dict(zip(keys,row)))
+        json_object = {'data': res, 'result': "true"}
+        cursor.close()
+        return JsonResponse(json_object)
+    except Exception as e:
+        return JsonResponse({'result': "false", 'message': 'error in getComments: ' + str(e)})

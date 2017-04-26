@@ -34,5 +34,6 @@ urlpatterns = [
     url(r'^profile/', userViews.getProfile),
     url(r'^addComment/', views.addComment),
     url(r'^getFollowers/', userViews.getFollowers),
-    url(r'^getNotifications/', userViews.getNotifications)
+    url(r'^getNotifications/', userViews.getNotifications),
+    url(r'^getComments/', views.getComments)
 ]
