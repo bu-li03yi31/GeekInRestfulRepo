@@ -41,7 +41,6 @@ def login(request):
     userPassJudge = Users.objects.filter(email=email, password=password)
     #print(userPassJudge.get(email=email).password)
     if userPassJudge:
-
         return JsonResponse({'result': True})
     else:
         return JsonResponse({'result': False})
@@ -143,3 +142,5 @@ def getComments(request):
         return JsonResponse(json_object)
     except Exception as e:
         return JsonResponse({'result': "false", 'message': 'error in getComments: ' + str(e)})
+
+

@@ -75,7 +75,6 @@ def createUser(request):
     body = json.loads(json_str)
     email = body['email']
     userPassJudge = Users.objects.filter(email=email)
-    # print(userPassJudge.get(UserName=username).User_ID)
 
     if userPassJudge:
         return JsonResponse({'result': "false"})
@@ -83,7 +82,6 @@ def createUser(request):
         filedir = os.getcwd() + "/users/"
         os.makedirs(os.path.dirname(filedir), exist_ok=True)
         for image in images:
-            # filename = os.path.join(dir, "/posts/"+str_time +"/"+ str(i) + ".jpg")
             with open(filedir + email + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
             i = i + 1

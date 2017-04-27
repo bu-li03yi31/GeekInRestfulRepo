@@ -20,12 +20,11 @@ from GeekInRest import views
 from GeekInRest import userViews
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'posts', views.PostViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^login/', views.login),
+    url(r'^createUser/', userViews.createUser),
     url(r'^newpost/', views.createNewPost),
     url(r'^addLike/', views.addLike),
     url(r'^removeLike/', views.removeLike),
