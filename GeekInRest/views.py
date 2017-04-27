@@ -18,7 +18,6 @@ import unicodedata
 
 from django.utils import timezone
 
-
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -35,42 +34,40 @@ class PostViewSet(viewsets.ModelViewSet):
 
 @csrf_exempt
 def login(request):
-    json_str = ((request.body).decode('utf-8'))
-    body = json.loads(json_str)
-    email = body['email']
-    password = body['password']
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        email = body['email']
+        password = body['password']
 
-    userPassJudge = Users.objects.filter(email=email, password=password)
-    #print(userPassJudge.get(email=email).password)
-    if userPassJudge:
-        return JsonResponse({'result': True})
-    else:
-        return JsonResponse({'result': False})
-
+        userIsLogedIn = Users.objects.filter(email=email, password=password)
+        #print(userPassJudge.get(email=email).password)
+        if userIsLogedIn:
+            return JsonResponse({'result': True})
+        else:
+            return JsonResponse({'result': False})
+    except Exception as e:
+        return JsonResponse({'result':False,'message':'error in login: ' + str(e)})
+    
 @csrf_exempt
-def user_tags(request):
+def addUserTags(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
         tags = body["tags"]
 	tags = unicodedata.normalize('NFKD', tags).encode('ascii','ignore')
         tags = tags[1:-1].split(',')
-	#print(tags)
         email = body["email"]
-	print(email)
-        #tags = ast.literal_eval(tags)
-        #print(tags[0])
-        print(type(tags[0]))
         for tag in tags:
 	    tag = tag.rstrip()
 	    print(tag)
-            instance1 = Users.objects.filter(email=email).get(email=email)
-            instance2 = Tags.objects.filter(tag=tag).get(tag=tag)
-            t = UserTags(email=instance1, tid=instance2)
+            user_email = Users.objects.filter(email=email).get(email=email)
+            user_tag = Tags.objects.filter(tag=tag).get(tag=tag)
+            t = UserTags(email=user_email, tid=user_tag)
             t.save()
         return JsonResponse({'result': True})
     except Exception as e:
-        return JsonResponse({'result':False,'message':'error in user_tag: ' + str(e)})
+        return JsonResponse({'result':False,'message':'error in addUserTags: ' + str(e)})
 
 #Create new post
 @csrf_exempt

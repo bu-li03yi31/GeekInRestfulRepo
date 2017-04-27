@@ -35,5 +35,5 @@ urlpatterns = [
     url(r'^getFollowers/', userViews.getFollowers),
     url(r'^getNotifications/', userViews.getNotifications),
     url(r'^getComments/', views.getComments),
-    url(r'^addUserTags',views.user_tags)
+    url(r'^addUserTags',views.addUserTags)
 ]
