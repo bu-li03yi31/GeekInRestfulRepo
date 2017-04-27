@@ -59,12 +59,22 @@ def getProfile(request):
         countFollowee=Following.objects.filter(follower=user).count()
         #get posts number
         countPosts=Posts.objects.filter(email=user).count()
+        #get photo path
+        tmp= Users.objects.values('photo').filter(email=user).first()
+        if not tmp:
+            path = '/home/ubuntu/GeekInProject/users/sabi.jpeg'
+        else:
+            path = tmp.get('photo')
+        #encode the image
+        with open(path, "rb") as imageFile:
+            img = base64.b64encode(imageFile.read())
+        #send response
         if 'self' in body:
             num_results = Following.objects.filter(follower=body['self'], followee=user).count();
             isFollowing = num_results
-            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "isFollowing": isFollowing})
+            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "isFollowing": isFollowing, "photo": img})
         else:
-            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts)})
+            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "photo": img})
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getProfile: ' + str(e)})
     

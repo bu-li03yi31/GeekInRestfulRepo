@@ -115,9 +115,9 @@ def removeLike(request):
         post = Posts.objects.get(pid=int(body['pid']))
         user = Users.objects.get(email=body['email'])
         Likes.objects.filter(pid=post, email=user).delete()
-        return JsonResponse({'result': "true"})
+        return JsonResponse({'result': True})
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in addLike: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in addLike: ' + str(e)})
 
 #add comment to a post
 @csrf_exempt
@@ -130,9 +130,9 @@ def addComment(request):
         post = Posts.objects.get(pid=int(body['pid']))
         comment = Comments(email=body['email'], content=body['content'], pid=post)
         comment.save()
-        return JsonResponse({'result': "true"})
+        return JsonResponse({'result': True})
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in addComment: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in addComment: ' + str(e)})
 
 
 #get comments of a post
