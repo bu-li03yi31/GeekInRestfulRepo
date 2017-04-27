@@ -25,7 +25,7 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^login/', views.login),
     url(r'^createUser/', userViews.createUser),
-    url(r'^newpost/', views.createNewPost),
+    url(r'^newPost/', views.createNewPost),
     url(r'^addLike/', views.addLike),
     url(r'^removeLike/', views.removeLike),
     url(r'^addFollowing/', userViews.addFollowing),
@@ -34,5 +34,6 @@ urlpatterns = [
     url(r'^addComment/', views.addComment),
     url(r'^getFollowers/', userViews.getFollowers),
     url(r'^getNotifications/', userViews.getNotifications),
-    url(r'^getComments/', views.getComments)
+    url(r'^getComments/', views.getComments),
+    url(r'^addUserTags',views.user_tags)
 ]

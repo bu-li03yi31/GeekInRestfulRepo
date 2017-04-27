@@ -13,6 +13,8 @@ from django.db import connection
 from datetime import datetime
 import os
 import base64
+import ast
+import unicodedata
 
 from django.utils import timezone
 
@@ -47,15 +49,28 @@ def login(request):
 
 @csrf_exempt
 def user_tags(request):
-    json_str = ((request.body).decode('utf-8'))
-    body = json.loads(json_str)
-    tags = body["tags"]
-    for tag in tags:
-        instance1 = Users.objects.filter(email=email).get(email=email)
-        instance2 = Tags.objects.filter(tid=tag).get(tid=tag)
-        t = UserTags(email=instance1, tid=instance2)
-        t.save()
-    return JsonResponse({'result': "true"})
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        tags = body["tags"]
+	tags = unicodedata.normalize('NFKD', tags).encode('ascii','ignore')
+        tags = tags[1:-1].split(',')
+	#print(tags)
+        email = body["email"]
+	print(email)
+        #tags = ast.literal_eval(tags)
+        #print(tags[0])
+        print(type(tags[0]))
+        for tag in tags:
+	    tag = tag.rstrip()
+	    print(tag)
+            instance1 = Users.objects.filter(email=email).get(email=email)
+            instance2 = Tags.objects.filter(tag=tag).get(tag=tag)
+            t = UserTags(email=instance1, tid=instance2)
+            t.save()
+        return JsonResponse({'result': True})
+    except Exception as e:
+        return JsonResponse({'result':False,'message':'error in user_tag: ' + str(e)})
 
 #Create new post
 @csrf_exempt
@@ -78,7 +93,7 @@ def createNewPost(request):
         i = i + 1
 
     data.save()
-    return JsonResponse({'result': "true"})
+    return JsonResponse({'result': True})
 
 #add like to a post
 @csrf_exempt
@@ -90,9 +105,9 @@ def addLike(request):
         user = Users.objects.get(email=body['email'])
         like = Likes(pid=post, email=user)
         like.save()
-        return JsonResponse({'result': "true"})
+        return JsonResponse({'result': True})
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in addLike: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in addLike: ' + str(e)})
 
 #remove like to a post
 @csrf_exempt
@@ -137,10 +152,10 @@ def getComments(request):
         res = []
         for row in rows:
             res.append(dict(zip(keys,row)))
-        json_object = {'data': res, 'result': "true"}
+        json_object = {'data': res, 'result': True}
         cursor.close()
         return JsonResponse(json_object)
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in getComments: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in getComments: ' + str(e)})
 
 

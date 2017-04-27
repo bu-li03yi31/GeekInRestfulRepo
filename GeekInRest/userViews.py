@@ -28,9 +28,9 @@ def removeFollowing(request):
         fer = Users.objects.get(email=body['follower'])
         fee = Users.objects.get(email=body['followee'])
         Following.objects.filter(follower=fer, followee=fee).delete()
-        return JsonResponse({'result': "true"})
+        return JsonResponse({'result': True})
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in addFollowing: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in addFollowing: ' + str(e)})
 
 #Add a following relationship
 @csrf_exempt
@@ -42,9 +42,9 @@ def addFollowing(request):
         fee = Users.objects.get(email=body['followee'])
         following = Following(follower=fer, followee=fee)
         following.save()
-        return JsonResponse({'result': "true"})
+        return JsonResponse({'result': True})
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in addFollowing: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in addFollowing: ' + str(e)})
 
 #Get user profile
 @csrf_exempt
@@ -62,32 +62,33 @@ def getProfile(request):
         if 'self' in body:
             num_results = Following.objects.filter(follower=body['self'], followee=user).count();
             isFollowing = num_results
-            return JsonResponse({'result': "true", "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "isFollowing": isFollowing})
+            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "isFollowing": isFollowing})
         else:
-            return JsonResponse({'result': "true", "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts)})
+            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts)})
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in getProfile: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in getProfile: ' + str(e)})
     
 #Sign up a new user
 @csrf_exempt
 def createUser(request):
-    json_str = ((request.body).decode('utf-8'))
-    body = json.loads(json_str)
-    email = body['email']
-    userPassJudge = Users.objects.filter(email=email)
-
-    if userPassJudge:
-        return JsonResponse({'result': "false"})
-    else:
-        filedir = os.getcwd() + "/users/"
-        os.makedirs(os.path.dirname(filedir), exist_ok=True)
-        for image in images:
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        email = body['email']
+        userPassJudge = Users.objects.filter(email=email)
+        image = body['image']
+        if userPassJudge:
+            return JsonResponse({'result': "false"})
+        else:
+            filedir = os.getcwd() + "/users/"
             with open(filedir + email + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
-            i = i + 1
-        data = Users(email=body["email"],password=body["password"],photo=filedir + email + ".jpg",username=body["username"])
-        data.save()
-        return JsonResponse({'result': "true"})
+            data = Users(email=body["email"],password=body["password"],photo=filedir + email + ".jpg",username=body["username"])
+            data.save()
+            return JsonResponse({'result': True})
+    except Exception as e:
+        print str(e)
+        return JsonResponse({'result': False, 'message': 'error in createUser: ' + str(e)})
 
 #Get all followers of one user
 @csrf_exempt
@@ -102,11 +103,11 @@ def getFollowers(request):
         keys = ('photo','username', 'email')
         for row in rows:
             result.append(dict(zip(keys,row)))
-        json_object = {'data': result, 'result': "true"}
+        json_object = {'data': result, 'result': True}
         cursor.close()
         return JsonResponse(json_object)
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in getFollowers: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in getFollowers: ' + str(e)})
 
 
 #Get Notifications
@@ -131,9 +132,9 @@ def getNotifications(request):
         for row in rows:
             comments.append(dict(zip(keys,row)))
             
-        json_object = {'likes': likes, 'result': "true", "comments": comments}
+        json_object = {'likes': likes, 'result': True, "comments": comments}
         cursor.close()
         return JsonResponse(json_object)
     except Exception as e:
-        return JsonResponse({'result': "false", 'message': 'error in getNotifications: ' + str(e)})
+        return JsonResponse({'result': False, 'message': 'error in getNotifications: ' + str(e)})
             

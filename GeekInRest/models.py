@@ -38,7 +38,7 @@ class Likes(models.Model):
 
 
 class PostTags(models.Model):
-    ptid = models.IntegerField(db_column='PTid', primary_key=True)  # Field name made lowercase.
+    ptid = models.AutoField(db_column='PTid', primary_key=True)  # Field name made lowercase.
     pid = models.ForeignKey('Posts', db_column='Pid', blank=True, null=True)  # Field name made lowercase.
     tid = models.ForeignKey('Tags', db_column='Tid', blank=True, null=True)  # Field name made lowercase.
 
@@ -57,7 +57,7 @@ class Tags(models.Model):
 
 #TID FOREIGN KEY
 class UserTags(models.Model):
-    utid = models.IntegerField(db_column='UTid', primary_key=True)  # Field name made lowercase.
+    utid = models.AutoField(db_column='UTid', primary_key=True)  # Field name made lowercase.
     email = models.ForeignKey('Users', db_column='Email', blank=True, null=True)  # Field name made lowercase.
     #tid = models.IntegerField(db_column='Tid', blank=True, null=True)  # Field name made lowercase.
     tid = models.ForeignKey(Tags, db_column='Tid')
@@ -77,7 +77,7 @@ class Users(models.Model):
         db_table = 'Users'
 
 class Following(models.Model):
-    fid = models.IntegerField(db_column='Fid', primary_key=True)  # Field name made lowercase.
+    fid = models.AutoField(db_column='Fid', primary_key=True)  # Field name made lowercase.
     follower = models.ForeignKey('Users', related_name = 'user1', db_column='Follower')
     followee = models.ForeignKey('Users', related_name = 'user2',db_column='Followee')
     timestamp = models.DateTimeField(db_column='TimeStamp',default=datetime.datetime.now,blank=True)
