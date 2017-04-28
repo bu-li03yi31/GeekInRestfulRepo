@@ -52,31 +52,69 @@ def getProfile(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        user = body['email']
+	if 'self' in body:
+	    self = body['self']
+	else:
+	    self = None
+	user_info = retrieveUserInfo(body['email'],self)
+	return JsonResponse(user_info)
+        #user = body['email']
         #get follower number
-        countFollower=Following.objects.filter(followee=user).count() 
+        #countFollower=Following.objects.filter(followee=user).count() 
         #get following number
-        countFollowee=Following.objects.filter(follower=user).count()
+        #countFollowee=Following.objects.filter(follower=user).count()
         #get posts number
-        countPosts=Posts.objects.filter(email=user).count()
+       # countPosts=Posts.objects.filter(email=user).count()
         #get photo path
-        tmp= Users.objects.values('photo').filter(email=user).first()
-        if not tmp:
-            path = '/home/ubuntu/GeekInProject/users/sabi.jpeg'
-        else:
-            path = tmp.get('photo')
+        #tmp= Users.objects.values('photo').filter(email=user).first()
+        #if not tmp:
+        #    path = '/home/ubuntu/GeekInProject/users/sabi.jpeg'
+        #else:
+        #    path = tmp.get('photo')
         #encode the image
-        with open(path, "rb") as imageFile:
-            img = base64.b64encode(imageFile.read())
+        #with open(path, "rb") as imageFile:
+         #   img = base64.b64encode(imageFile.read())
         #send response
-        if 'self' in body:
-            num_results = Following.objects.filter(follower=body['self'], followee=user).count();
-            isFollowing = num_results
-            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "isFollowing": isFollowing, "photo": img})
-        else:
-            return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "photo": img})
+       # if 'self' in body:
+         #   num_results = Following.objects.filter(follower=body['self'], followee=user).count();
+         #   isFollowing = num_results
+         #   return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "isFollowing": isFollowing, "photo": img})
+        #else:
+           # return JsonResponse({'result': True, "follower_count": str(countFollower), "followee_count": str(countFollowee), "post_count": str(countPosts), "photo": img})
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getProfile: ' + str(e)})
+
+# The inpput body is in python's dicionary format
+def retrieveUserInfo(user,self):
+    try:
+        user_name = Users.objects.filter(email=user).get(email=user).username
+        # get follower number
+        countFollower = Following.objects.filter(followee=user).count()
+        # get posts number
+        countFollowee = Following.objects.filter(follower=user).count()
+        # get post number 
+        countPost=Posts.objects.filter(email=user).count()
+        # get photo path
+        tmp=Users.objects.values('photo').filter(email=user).first()
+        if not tmp:
+	    path = 'home/ubunt/GeekInProject/users/sabi.jpeg'
+	else:
+	    path = tmp.get('photo')
+	#encode the image
+	with open(path,'rb') as imageFile:
+	    img = base64.b64encode(imageFile.read())
+
+	# send a dictionary include user infomation
+	if self != None:
+	    num_results = Following.objects.filter(follower =self,followee=user).count()
+            isFollowing = num_results
+	    user_info = str({'user_email':str(user),'user_name':str(user_name),'follower_count':countFollower,'followee_count':countFollowee,'post_count':countPost,'isFollowing':isFollowing,'photo':str(img)})
+	    return {'result':True,'user_info':user_info}
+	else:
+	    user_info = str({'user_email':str(user),'user_name':str(user_name),'follower_count':countFollower,'followee_count':countFollowee,'post_count':countPost,'isFollowing':None,'photo':str(img)})
+	    return {'result': True,'user_info':user_info}
+    except Exception as e:
+	return {'result': False, 'message': 'error in getProfile: ' + str(e)}  
     
 #Sign up a new user
 @csrf_exempt

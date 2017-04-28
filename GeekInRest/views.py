@@ -15,6 +15,7 @@ import os
 import base64
 import ast
 import unicodedata
+from GeekInRest import userViews
 
 from django.utils import timezone
 
@@ -39,14 +40,27 @@ def login(request):
         body = json.loads(json_str)
         email = body['email']
         password = body['password']
-
+	if 'self' in body:
+	    self = True
+	else:
+	    self = False
         userIsLogedIn = Users.objects.filter(email=email, password=password)
-        #print(userPassJudge.get(email=email).password)
+       # print(userPassJudge.get(email=email).password)
         if userIsLogedIn:
-            return JsonResponse({'result': True})
+            #return JsonResponse({'result': True})
+	    userInfo = userViews.retrieveUserInfo(email,self)
+	    #print()
+	    if 'user_info' in userInfo:
+	        print('has user info')
+	    if 'message' in userInfo:
+		print(userInfo['message'])
+
+	    return JsonResponse(userInfo)
         else:
-            return JsonResponse({'result': False})
+	    print('cnm')
+            return JsonResponse({'result': False,'message':'user haven\'t logged in'})
     except Exception as e:
+	print('cnm2')
         return JsonResponse({'result':False,'message':'error in login: ' + str(e)})
     
 @csrf_exempt
