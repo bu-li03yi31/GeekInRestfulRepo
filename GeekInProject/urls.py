@@ -36,5 +36,7 @@ urlpatterns = [
     url(r'^getNotifications/', userViews.getNotifications),
     url(r'^getComments/', views.getComments),
     url(r'^getPosts/', views.getPosts),
-    url(r'^addUserTags',views.addUserTags)
+    url(r'^addUserTags',views.addUserTags),
+    url(r'^getPostDetail',views.getPostDetail),
+    url(r'^getPostImage',views.getPostImage),
 ]

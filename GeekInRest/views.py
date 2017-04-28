@@ -2,6 +2,7 @@
 #Modified by Yi Li, Yiteng Xu and Desheng Zhang
 
 from django.shortcuts import render
+from django.shortcuts import HttpResponse
 from GeekInRest.models import Users, Posts, UserTags, Tags, Likes, Posts, Comments
 from GeekInRest.serializers import UserSerializer, PostSerializer
 from rest_framework import viewsets
@@ -16,8 +17,10 @@ import base64
 import ast
 import unicodedata
 from GeekInRest import userViews
-
+import glob
 from django.utils import timezone
+import os
+from PIL import Image
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -176,9 +179,9 @@ def getPosts(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        #page=int(body['page'])
+        page=int(body['page'])
         cursor = connection.cursor()
-        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo, p.Pid  from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'"')
+        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo, p.Pid  from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'" limit '+str(6*page)+','+str(6*page+5))
         rows=cursor.fetchall()
         res = []
         for row in rows:
@@ -196,3 +199,47 @@ def getPosts(request):
         return JsonResponse(json_object)
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getPosts: ' + str(e)})
+
+@csrf_exempt
+def getPostDetail(request):
+    try:
+	json_str = ((request.body).decode('utf-8'))
+	body = json.loads(json_str)
+	post_object = Posts.objects.get(pid = body['pid'])
+	user_email = post_object.email.email
+	user_name = post_object.email.username
+	#title = post_object.title
+	#content = post_object.content
+	star_num = Likes.objects.filter(pid = post_object).count()
+	comment_num = Comments.objects.filter(pid = post_object).count()
+	post_photo_path = post_object.photo
+	post_photo_list = getPhotoList(post_photo_path)
+	path = Users.objects.values('photo').filter(email=user_email).first().get('photo')
+	with open(path,'rb') as imageFile:
+            img = base64.b64encode(imageFile.read())
+        print path
+	data = str({'pid':body['pid'],'user_email':user_email,'user_name':user_name,'user_photo':img,'comment_count':comment_num,'star_count':star_num,'title':post_object.title,'content':post_object.content,'photos':post_photo_list})
+	return JsonResponse({'result':True,'data':data})
+    except Exception as e:
+	return JsonResponse({'result': False, 'message': 'error in getPostDetail: ' + str(e)})
+
+
+@csrf_exempt
+def getPostImage(request):
+    try:
+	path = request.get_full_path()[13:]
+	print(path)
+	with open(path,'rb') as img:
+	    return HttpResponse(img.read(),content_type="image/jpg")
+    except IOError:
+        red  = Image.new('RGBA',(1,1),(255,0,0))
+        response = HttpResponse(content_type="image/jpg")
+        red.save(response,"JPEG")
+        return response
+
+def getPhotoList(path):
+    try:
+        return [str(path+f) for f in os.listdir(path) if f.endswith('.jpg')]
+    except Exception as e:
+	return esonResponse({'result': False, 'message': 'error in getPostList: ' + str(e)})
+	
