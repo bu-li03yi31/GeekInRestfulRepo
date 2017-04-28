@@ -90,10 +90,10 @@ def createNewPost(request):
 
         str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
         user_email = Users.objects.get(email=body["email"])
-        data = Posts(email=user_email, title=body["title"], content=body["content"],photo="/posts/"+body["email"]+"_"+str_time)
+        filename=os.getcwd()+"/posts/"+body["email"]+"_"+str_time+"/"
+        data = Posts(email=user_email, title=body["title"], content=body["content"],photo=filename)
         images = body["images"]
         i = 0
-        filename=os.getcwd()+"/posts/"+body["email"]+"_"+str_time+"/"
         os.makedirs(os.path.dirname(filename))
 
         for image in images:
@@ -176,10 +176,23 @@ def getPosts(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        user_email=body['email']
-        page=int(body['page'])
+        #page=int(body['page'])
         cursor = connection.cursor()
-        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'" limit '+0*page+','+0*page+5)
-        rows=connection.cursor()
+        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo, p.Pid  from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'"')
+        rows=cursor.fetchall()
+        res = []
+        for row in rows:
+            username=row[1]
+            title=row[2]
+            path=row[3]+'/0.jpg'
+            with open(path,'rb') as imageFile:
+                p_img=base64.b64encode(imageFile.read())
+            path=row[0]
+            with open(path,'rb') as imageFile:
+                u_img=base64.b64encode(imageFile.read())
+            res.append({'pid':int(row[4]), 'username':username, 'title':title, 'post_cover':p_img, 'user_photo':u_img})
+        json_object = {'data': res, 'result': True}
+        cursor.close()
+        return JsonResponse(json_object)
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getPosts: ' + str(e)})
