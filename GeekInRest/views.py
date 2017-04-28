@@ -57,10 +57,8 @@ def login(request):
 
 	    return JsonResponse(userInfo)
         else:
-	    print('cnm')
             return JsonResponse({'result': False,'message':'user haven\'t logged in'})
     except Exception as e:
-	print('cnm2')
         return JsonResponse({'result':False,'message':'error in login: ' + str(e)})
     
 @csrf_exempt
@@ -86,26 +84,28 @@ def addUserTags(request):
 #Create new post
 @csrf_exempt
 def createNewPost(request):
-    json_str = ((request.body).decode('utf-8'))
-    body = json.loads(json_str)
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
 
-    str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
-    data = Posts(email=body["email"], title=body["title"], content=body["content"],
-                        photo="/posts/"+str_time)
-    images = body["images"]
-    i = 0
+        str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
+        user_email = Users.objects.get(email=body["email"])
+        data = Posts(email=user_email, title=body["title"], content=body["content"],photo="/posts/"+body["email"]+"_"+str_time)
+        images = body["images"]
+        i = 0
+        filename=os.getcwd()+"/posts/"+body["email"]+"_"+str_time+"/"
+        os.makedirs(os.path.dirname(filename))
 
-    filename=os.getcwd()+"/posts/"+str_time+"/"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    for image in images:
-        # filename = os.path.join(dir, "/posts/"+str_time +"/"+ str(i) + ".jpg")
-        with open( filename+ str(i) + ".jpg", 'wb') as f:
-            f.write(base64.b64decode(image))
-        i = i + 1
-
-    data.save()
-    return JsonResponse({'result': True})
-
+        for image in images:
+            # filename = os.path.join(dir, "/posts/"+str_time +"/"+ str(i) + ".jpg")
+            with open( filename+ str(i) + ".jpg", 'wb') as f:
+                f.write(base64.b64decode(image))
+            i = i + 1
+        data.save()
+        return JsonResponse({'result': True})
+    except Exception as e:
+        return JsonResponse({'result': False, 'message': 'error in createNewPost: ' + str(e)})
+        
 #add like to a post
 @csrf_exempt
 def addLike(request):
@@ -170,3 +170,16 @@ def getComments(request):
         return JsonResponse({'result': False, 'message': 'error in getComments: ' + str(e)})
 
 
+#get posts of a email
+@csrf_exempt
+def getPosts(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        user_email=body['email']
+        page=int(body['page'])
+        cursor = connection.cursor()
+        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'" limit '+0*page+','+0*page+5)
+        rows=connection.cursor()
+    except Exception as e:
+        return JsonResponse({'result': False, 'message': 'error in getPosts: ' + str(e)})

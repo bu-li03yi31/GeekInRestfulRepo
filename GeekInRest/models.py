@@ -87,7 +87,7 @@ class Following(models.Model):
 
 class Posts(models.Model):
     pid = models.AutoField(db_column='Pid', primary_key=True)  # Field name made lowercase.
-    email = models.CharField(db_column='Email', max_length=100, blank=True, null=True)  # Field name made lowercase
+    email = models.ForeignKey('Users', db_column='Email', null=True)
     content = models.TextField(db_column='Content', blank=True, null=True)  # Field name made lowercase.
     photo = models.CharField(db_column='Photo', max_length=100, blank=True, null=True)  # Field name made lowercase.
     title = models.CharField(db_column='Title', max_length=100, blank=True, null=True)  # Field name made lowercase.
