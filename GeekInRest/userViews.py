@@ -156,7 +156,7 @@ def getNotifications(request):
                 img=base64.b64encode(imageFile.read())
             likes.append({'username':username, 'email':user_email, 'title':title, 'date':date, 'user_photo':img})
         #get comments notifications from query results
-        cursor.execute('select u2.Email, u2.Username, tmp.Title, tmp.Timestamp, u2.Photo from Users u2, (select c.Email, p.Title, c.Timestamp from Users u, Posts p, Comments c where u.Email=p.Email and p.Pid=c.Pid and u.Email="'+body['email']+'") as tmp where u2.Email=tmp.Email')
+        cursor.execute('select u2.Email, u2.Username, tmp.Title, DATE_FORMAT(tmp.TimeStamp,"%m-%d %H:%i"), u2.Photo from Users u2, (select c.Email, p.Title, c.Timestamp from Users u, Posts p, Comments c where u.Email=p.Email and p.Pid=c.Pid and u.Email="'+body['email']+'") as tmp where u2.Email=tmp.Email')
         rows = cursor.fetchall()
         comments = []
         for row in rows:
