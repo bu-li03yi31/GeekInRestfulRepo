@@ -162,10 +162,18 @@ def getComments(request):
         cursor = connection.cursor()
         cursor.execute('select p.Pid, u.Username, u.Photo, c.Email, c.Content, DATE_FORMAT(c.TimeStamp,"%m-%d %H:%i") from Users u, Comments c, Posts p where p.Pid=c.Pid and u.Email=c.Email and p.Pid=' + str(pid))
         rows = cursor.fetchall()
-        keys = ('pid','username','photo','email','content','date')
+        #keys = ('pid','username','photo','email','content','date')
         res = []
         for row in rows:
-            res.append(dict(zip(keys,row)))
+            #res.append(dict(zip(keys,row)))
+            username=row[1]
+            path=row[2]
+            user_email=row[3]
+            content=row[4]
+            date=row[5]
+            with open(path,'rb') as imageFile:
+                img=base64.b64encode(imageFile.read())
+            res.append({'username':username, 'user_photo':img, 'content':content, 'date':date, 'email':user_email})
         json_object = {'data': res, 'result': True}
         cursor.close()
         return JsonResponse(json_object)
