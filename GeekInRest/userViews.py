@@ -142,7 +142,7 @@ def getNotifications(request):
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
         cursor = connection.cursor()
-        cursor.execute('select u2.Email, u2.Username, tmp.Title, DATE_FORMAT(tmp.TimeStamp,"%m-%d %H:%i"), u2.Photo from Users u2, (select l.Email, p.Title, l.Timestamp from Users u, Posts p, Likes l where u.Email=p.Email and p.Pid=l.Pid and u.Email="'+body['email']+'") as tmp where u2.Email=tmp.Email')
+        cursor.execute('select u2.Email, u2.Username, tmp.Title, DATE_FORMAT(tmp.TimeStamp,"%m-%d %H:%i"), u2.Photo, tmp.Pid, tmp.Photo as p_photo from Users u2, (select p.Pid, l.Email, p.Title, l.Timestamp, p.Photo from Users u, Posts p, Likes l where u.Email=p.Email and p.Pid=l.Pid and u.Email="'+body['email']+'") as tmp where u2.Email=tmp.Email')
         rows = cursor.fetchall()
         #get likes from the query results 
         likes = []
@@ -151,12 +151,16 @@ def getNotifications(request):
             username=row[1]
             title=row[2]
             date=row[3]
-            path=row[4]
-            with open(path,'rb') as imageFile:
-                img=base64.b64encode(imageFile.read())
-            likes.append({'username':username, 'email':user_email, 'title':title, 'date':date, 'user_photo':img})
+            u_path=row[4]
+            pid=row[5]
+            p_path=row[6]+'0.jpg'
+            with open(u_path,'rb') as imageFile:
+                u_img=base64.b64encode(imageFile.read())
+            with open(p_path,'rb') as imageFile:
+                p_img=base64.b64encode(imageFile.read())
+            likes.append({'username':username, 'email':user_email, 'title':title, 'date':date, 'user_photo':u_img, 'pid':int(pid), 'post_cover':p_img})
         #get comments notifications from query results
-        cursor.execute('select u2.Email, u2.Username, tmp.Title, DATE_FORMAT(tmp.TimeStamp,"%m-%d %H:%i"), u2.Photo from Users u2, (select c.Email, p.Title, c.Timestamp from Users u, Posts p, Comments c where u.Email=p.Email and p.Pid=c.Pid and u.Email="'+body['email']+'") as tmp where u2.Email=tmp.Email')
+        cursor.execute('select u2.Email, u2.Username, tmp.Title, DATE_FORMAT(tmp.TimeStamp,"%m-%d %H:%i"), u2.Photo, tmp.Pid, tmp.Photo as p_photo from Users u2, (select p.Pid, c.Email, p.Title, c.Timestamp, p.Photo from Users u, Posts p, Comments c where u.Email=p.Email and p.Pid=c.Pid and u.Email="'+body['email']+'") as tmp where u2.Email=tmp.Email')
         rows = cursor.fetchall()
         comments = []
         for row in rows:
@@ -164,10 +168,14 @@ def getNotifications(request):
             username=row[1]
             title=row[2]
             date=row[3]
-            path=row[4]
-            with open(path,'rb') as imageFile:
-                img=base64.b64encode(imageFile.read())
-            comments.append({'username':username, 'email':user_email, 'title':title, 'date':date, 'user_photo':img})
+            u_path=row[4]
+            pid=row[5]
+            p_path=row[6]+'0.jpg'
+            with open(u_path,'rb') as imageFile:
+                u_img=base64.b64encode(imageFile.read())
+            with open(p_path,'rb') as imageFile:
+                p_img=base64.b64encode(imageFile.read())
+            comments.append({'username':username, 'email':user_email, 'title':title, 'date':date, 'user_photo':u_img, 'pid':int(pid), 'post_cover':p_img})
         json_object = {'likes': likes, 'result': True, "comments": comments}
         cursor.close()
         return JsonResponse(json_object)
