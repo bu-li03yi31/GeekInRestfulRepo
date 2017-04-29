@@ -38,5 +38,5 @@ urlpatterns = [
     url(r'^getPosts/', views.getPosts),
     url(r'^addUserTags',views.addUserTags),
     url(r'^getPostDetail',views.getPostDetail),
-    url(r'^getPostImage',views.getPostImage),
+    url(r'^getPostImage',views.getPostImage)
 ]

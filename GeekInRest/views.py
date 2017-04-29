@@ -48,11 +48,8 @@ def login(request):
 	else:
 	    self = False
         userIsLogedIn = Users.objects.filter(email=email, password=password)
-       # print(userPassJudge.get(email=email).password)
         if userIsLogedIn:
-            #return JsonResponse({'result': True})
 	    userInfo = userViews.retrieveUserInfo(email,self)
-	    #print()
 	    if 'user_info' in userInfo:
 	        print('has user info')
 	    if 'message' in userInfo:
@@ -75,7 +72,6 @@ def addUserTags(request):
         email = body["email"]
         for tag in tags:
 	    tag = tag.rstrip()
-	    print(tag)
             user_email = Users.objects.filter(email=email).get(email=email)
             user_tag = Tags.objects.filter(tag=tag).get(tag=tag)
             t = UserTags(email=user_email, tid=user_tag)
@@ -224,7 +220,6 @@ def getPostDetail(request):
         isLiked = Likes.objects.filter(pid=post_object, email=Users.objects.get(email=body['email'])).count()
 	with open(path,'rb') as imageFile:
             img = base64.b64encode(imageFile.read())
-        print path
 	data = {'pid':body['pid'],'user_email':user_email,'user_name':user_name,'user_photo':img,'comment_count':comment_num,'star_count':star_num,'title':post_object.title,'content':post_object.content,'photos':post_photo_list, 'isLiked': int(isLiked)}
 	return JsonResponse({'result':True,'data':data})
     except Exception as e:
@@ -235,7 +230,6 @@ def getPostDetail(request):
 def getPostImage(request):
     try:
 	path = request.get_full_path()[13:]
-	print(path)
 	with open(path,'rb') as img:
 	    return HttpResponse(img.read(),content_type="image/jpg")
     except IOError:
