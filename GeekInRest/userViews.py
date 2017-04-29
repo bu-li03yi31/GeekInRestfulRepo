@@ -1,5 +1,5 @@
 #Created by Yi Li and Yiteng Xu in 2017/04/23
-#Modified by Yi Li, Yiteng Xu
+#Modified by Yi Li, Yiteng Xu, Desheng Zhang
 #A view where contains all user-relate interfaces (user follow, fetch user profiles, get followers, etc)
 
 from django.shortcuts import render
@@ -57,11 +57,13 @@ def getProfile(request):
 	else:
 	    self = None
 	user_info = retrieveUserInfo(body['email'],self)
+	#print(user_info)
 	return JsonResponse(user_info)
     except Exception as e:
+	#print('no')
         return JsonResponse({'result': False, 'message': 'error in getProfile: ' + str(e)})
 
-# The inpput body is in python's dicionary format
+# use email address and self info to retrieve user info
 def retrieveUserInfo(user,self):
     try:
         user_name = Users.objects.filter(email=user).get(email=user).username
@@ -92,7 +94,7 @@ def retrieveUserInfo(user,self):
 	    return {'result': True,'user_info':user_info}
     except Exception as e:
 	return {'result': False, 'message': 'error in getProfile: ' + str(e)}  
-    
+
 #Sign up a new user
 @csrf_exempt
 def createUser(request):
@@ -102,6 +104,7 @@ def createUser(request):
         email = body['email']
         userPassJudge = Users.objects.filter(email=email)
         image = body['image']
+	#print(image)
         if userPassJudge:
             return JsonResponse({'result': "false"})
         else:

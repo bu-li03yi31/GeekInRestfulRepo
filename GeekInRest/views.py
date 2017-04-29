@@ -68,15 +68,17 @@ def addUserTags(request):
         body = json.loads(json_str)
         tags = body["tags"]
 	tags = unicodedata.normalize('NFKD', tags).encode('ascii','ignore')
-        tags = tags[1:-1].split(',')
+	tags = tags[1:-1].split(',')
+	tags = [t.strip() for t in tags]
         email = body["email"]
+	user_info = userViews.retrieveUserInfo(email,None)
         for tag in tags:
 	    tag = tag.rstrip()
             user_email = Users.objects.filter(email=email).get(email=email)
             user_tag = Tags.objects.filter(tag=tag).get(tag=tag)
             t = UserTags(email=user_email, tid=user_tag)
             t.save()
-        return JsonResponse({'result': True})
+        return JsonResponse(user_info)
     except Exception as e:
         return JsonResponse({'result':False,'message':'error in addUserTags: ' + str(e)})
 
@@ -100,7 +102,7 @@ def createNewPost(request):
             with open( filename+ str(i) + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
             i = i + 1
-        data.save()
+        print data.pk
         return JsonResponse({'result': True})
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in createNewPost: ' + str(e)})
@@ -158,10 +160,8 @@ def getComments(request):
         cursor = connection.cursor()
         cursor.execute('select p.Pid, u.Username, u.Photo, c.Email, c.Content, DATE_FORMAT(c.TimeStamp,"%m-%d %H:%i") from Users u, Comments c, Posts p where p.Pid=c.Pid and u.Email=c.Email and p.Pid=' + str(pid))
         rows = cursor.fetchall()
-        #keys = ('pid','username','photo','email','content','date')
         res = []
         for row in rows:
-            #res.append(dict(zip(keys,row)))
             username=row[1]
             path=row[2]
             user_email=row[3]
@@ -176,7 +176,35 @@ def getComments(request):
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getComments: ' + str(e)})
 
-
+#get trending posts
+@csrf_exempt
+def getTrends(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        page=int(body['page'])
+        cursor = connection.cursor()
+        if 'tag' not in body:
+            cursor.execute("select Pid, p.Email, p.Photo, Title, u.Photo from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+5))
+        else:
+            tid=int(body['tag'])
+            cursor.execute("select p.Pid, p.Email, p.Photo, Title, u.Photo from Posts p, Post_Tags t, Users u where p.Email=u.Email and  p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+5))
+        rows = cursor.fetchall()
+        res = []
+        for row in rows:
+            p_path=row[2]+'0.jpg'
+            u_path=row[4]
+            with open(p_path,'rb') as imageFile:
+                p_img=base64.b64encode(imageFile.read())
+            with open(u_path,'rb') as imageFile:
+                u_img=base64.b64encode(imageFile.read())
+            res.append({'pid':int(row[0]), 'email':row[1], 'title':row[3], 'post_cover':p_img, 'user_photo':u_img})
+        json_object = {'data': res, 'result': True}
+        cursor.close()
+        return JsonResponse(json_object)
+    except Exception as e:
+        return JsonResponse({'result': False, 'message': 'error in getTrends: ' + str(e)})
+        
 #get posts of a email
 @csrf_exempt
 def getPosts(request):
@@ -204,18 +232,23 @@ def getPosts(request):
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getPosts: ' + str(e)})
 
+# get detail information of the post
 @csrf_exempt
 def getPostDetail(request):
     try:
 	json_str = ((request.body).decode('utf-8'))
 	body = json.loads(json_str)
+	# retrieve post post object by 'pid'
 	post_object = Posts.objects.get(pid = body['pid'])
+	# get user object first and then get user email
 	user_email = post_object.email.email
 	user_name = post_object.email.username
 	star_num = Likes.objects.filter(pid = post_object).count()
 	comment_num = Comments.objects.filter(pid = post_object).count()
+	# get the path of photos of the post
 	post_photo_path = post_object.photo
 	post_photo_list = getPhotoList(post_photo_path)
+	# path to user profile photo
 	path = Users.objects.values('photo').filter(email=user_email).first().get('photo')
         isLiked = Likes.objects.filter(pid=post_object, email=Users.objects.get(email=body['email'])).count()
 	with open(path,'rb') as imageFile:
@@ -225,19 +258,22 @@ def getPostDetail(request):
     except Exception as e:
 	return JsonResponse({'result': False, 'message': 'error in getPostDetail: ' + str(e)})
 
-
+# parse url to get Post Image
 @csrf_exempt
 def getPostImage(request):
     try:
+	# igonore first 13 characters
 	path = request.get_full_path()[13:]
 	with open(path,'rb') as img:
 	    return HttpResponse(img.read(),content_type="image/jpg")
     except IOError:
+	# if we cannot find target image, create one using PIL
         red  = Image.new('RGBA',(1,1),(255,0,0))
         response = HttpResponse(content_type="image/jpg")
         red.save(response,"JPEG")
         return response
 
+# return all files ends with '.jpg' under input path
 def getPhotoList(path):
     try:
         return [str(path+f) for f in os.listdir(path) if f.endswith('.jpg')]
