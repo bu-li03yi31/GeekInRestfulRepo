@@ -108,7 +108,7 @@ def createNewPost(request):
         return JsonResponse({'result': True})
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in createNewPost: ' + str(e)})
-        
+    
 #add like to a post
 @csrf_exempt
 def addLike(request):
@@ -208,17 +208,16 @@ def getPostDetail(request):
 	post_object = Posts.objects.get(pid = body['pid'])
 	user_email = post_object.email.email
 	user_name = post_object.email.username
-	#title = post_object.title
-	#content = post_object.content
 	star_num = Likes.objects.filter(pid = post_object).count()
 	comment_num = Comments.objects.filter(pid = post_object).count()
 	post_photo_path = post_object.photo
 	post_photo_list = getPhotoList(post_photo_path)
 	path = Users.objects.values('photo').filter(email=user_email).first().get('photo')
+        isLiked = Likes.objects.filter(pid=post_object, email=Users.objects.get(email=body['email'])).count()
 	with open(path,'rb') as imageFile:
             img = base64.b64encode(imageFile.read())
         print path
-	data = str({'pid':body['pid'],'user_email':user_email,'user_name':user_name,'user_photo':img,'comment_count':comment_num,'star_count':star_num,'title':post_object.title,'content':post_object.content,'photos':post_photo_list})
+	data = {'pid':body['pid'],'user_email':user_email,'user_name':user_name,'user_photo':img,'comment_count':comment_num,'star_count':star_num,'title':post_object.title,'content':post_object.content,'photos':post_photo_list, 'isLiked': int(isLiked)}
 	return JsonResponse({'result':True,'data':data})
     except Exception as e:
 	return JsonResponse({'result': False, 'message': 'error in getPostDetail: ' + str(e)})

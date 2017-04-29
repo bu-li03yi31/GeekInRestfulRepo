@@ -28,8 +28,6 @@ class Likes(models.Model):
     lid = models.AutoField(db_column='Lid', primary_key=True)  # Field name made lowercase.
     pid = models.ForeignKey('Posts', db_column='Pid')
     email = models.ForeignKey('Users', db_column='Email')
-    #pid = models.IntegerField(db_column='Pid', blank=True, null=True)  # Field name made lowercase.
-    #email = models.CharField(db_column='Email', max_length=100, blank=True, null=True)  # Field name made lowercase.
     timestamp = models.DateTimeField(db_column='TimeStamp', default=datetime.datetime.now,blank=True)
 
     class Meta:
