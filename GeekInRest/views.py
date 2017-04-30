@@ -97,11 +97,10 @@ def createNewPost(request):
         os.makedirs(os.path.dirname(filename))
         data.save()
         for image in images:
-            # filename = os.path.join(dir, "/posts/"+str_time +"/"+ str(i) + ".jpg")
             with open( filename+ str(i) + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
             i = i + 1
-        print data.pid
+        PostTags(pid=int(data.pid), tid=(body['tid'])).save()
         return JsonResponse({'result': True})
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in createNewPost: ' + str(e)})
