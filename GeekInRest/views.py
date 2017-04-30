@@ -174,6 +174,19 @@ def getComments(request):
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getComments: ' + str(e)})
 
+#get post by keyword
+@csrf_exempt
+def searchPosts(request):
+    try:
+        json_str = ((request.body).decode('utf-8'))
+        body = json.loads(json_str)
+        page=int(body['page'])
+        q=body['keyword']
+        
+    except Exception as e:
+        return JsonResponse({'result': False, 'message': 'error in searchPosts: ' + str(e)})
+                
+    
 #get trending posts
 @csrf_exempt
 def getTrends(request):
@@ -182,10 +195,10 @@ def getTrends(request):
         body = json.loads(json_str)
         page=int(body['page'])
         cursor = connection.cursor()
-        if 'tag' not in body:
+        tid=int(body['tag'])
+        if tid == 0:
             cursor.execute("select Pid, p.Email, p.Photo, Title, u.Photo from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+5))
         else:
-            tid=int(body['tag'])
             cursor.execute("select p.Pid, p.Email, p.Photo, Title, u.Photo from Posts p, Post_Tags t, Users u where p.Email=u.Email and  p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+5))
         rows = cursor.fetchall()
         res = []
