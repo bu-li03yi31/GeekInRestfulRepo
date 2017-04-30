@@ -182,7 +182,26 @@ def searchPosts(request):
         body = json.loads(json_str)
         page=int(body['page'])
         q=body['keyword']
-        
+        order=int(body['order'])
+        cursor = connection.cursor()
+        tmp = "%"+q+"%"
+        if order == 1:
+            cursor.execute("select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY TimeStamp ASC LIMIT "+str(6*page)+","+str(6*page+6))
+        elif order == 0:
+            cursor.execute("select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFt JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY tmp.Count DESC LIMIT "+str(6*page)+","+str(6*page+6))
+        rows = cursor.fetchall()
+        res = []
+        for row in rows:
+            p_path=row[5]+'0.jpg'
+            u_path=row[4]
+            with open(p_path,'rb') as imageFile:
+                p_img=base64.b64encode(imageFile.read())
+            with open(u_path,'rb') as imageFile:
+                u_img=base64.b64encode(imageFile.read())
+            res.append({'pid':int(row[1]), 'email':row[2], 'title':row[0], 'post_cover':p_img, 'user_photo':u_img, 'username':row[3]})
+        json_object = {'data': res, 'result': True}
+        cursor.close()
+        return JsonResponse(json_object)
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in searchPosts: ' + str(e)})
                 

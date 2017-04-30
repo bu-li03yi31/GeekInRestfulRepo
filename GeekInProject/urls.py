@@ -41,4 +41,5 @@ urlpatterns = [
     url(r'^getPostDetail',views.getPostDetail),
     url(r'^getPostImage',views.getPostImage),
     url(r'^getProfile',userViews.getProfile),
+    url(r'^searchPosts',views.searchPosts)
 ]
