@@ -197,9 +197,9 @@ def getTrends(request):
         cursor = connection.cursor()
         tid=int(body['tag'])
         if tid == 0:
-            cursor.execute("select Pid, p.Email, p.Photo, Title, u.Photo from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+5))
+            cursor.execute("select Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+6))
         else:
-            cursor.execute("select p.Pid, p.Email, p.Photo, Title, u.Photo from Posts p, Post_Tags t, Users u where p.Email=u.Email and  p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+5))
+            cursor.execute("select p.Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Post_Tags t, Users u where p.Email=u.Email and  p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+6))
         rows = cursor.fetchall()
         res = []
         for row in rows:
@@ -209,7 +209,7 @@ def getTrends(request):
                 p_img=base64.b64encode(imageFile.read())
             with open(u_path,'rb') as imageFile:
                 u_img=base64.b64encode(imageFile.read())
-            res.append({'pid':int(row[0]), 'email':row[1], 'title':row[3], 'post_cover':p_img, 'user_photo':u_img})
+            res.append({'pid':int(row[0]), 'email':row[1], 'title':row[3], 'post_cover':p_img, 'user_photo':u_img, 'username':row[5]})
         json_object = {'data': res, 'result': True}
         cursor.close()
         return JsonResponse(json_object)
@@ -224,7 +224,7 @@ def getPosts(request):
         body = json.loads(json_str)
         page=int(body['page'])
         cursor = connection.cursor()
-        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo, p.Pid  from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'" limit '+str(6*page)+','+str(6*page+5))
+        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo, p.Pid  from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'" limit '+str(6*page)+','+str(6*page+6))
         rows=cursor.fetchall()
         res = []
         for row in rows:
