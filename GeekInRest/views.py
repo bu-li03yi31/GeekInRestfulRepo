@@ -101,7 +101,7 @@ def createNewPost(request):
                 f.write(base64.b64decode(image))
             if i == 0:
                 cover=Image.open(filename+ str(i) + ".jpg")
-                cover.resize((200,200)).save(filename+"cover.jpg", format="JPEG", quality=70)
+                cover.resize((250,250)).save(filename+"cover.jpg", format="JPEG", quality=70)
             i = i + 1
         
         tag_list=body['tags'].encode('utf-8')[1:-1].split(',')
@@ -284,7 +284,8 @@ def getPostDetail(request):
 	comment_num = Comments.objects.filter(pid = post_object).count()
 	# get the path of photos of the post
 	post_photo_path = post_object.photo
-	post_photo_list = getPhotoList(post_photo_path)
+	post_photo_list = getPhotoList(post_photo_path)[:-1]
+        #print(post_photo_list)
 	# path to user profile photo
 	path = Users.objects.values('photo').filter(email=user_email).first().get('photo')
         isLiked = Likes.objects.filter(pid=post_object, email=Users.objects.get(email=body['email'])).count()
