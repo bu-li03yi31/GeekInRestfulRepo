@@ -44,7 +44,6 @@ def login(request):
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
         email = body['email']
-        password = body['password']
         if 'facebook' in body:
             fb_email=body['email']
             fb_name=body['username']
@@ -52,10 +51,12 @@ def login(request):
             if count == 0:
                 char_set=string.ascii_uppercase + string.digits
                 pwd=''.join(random.sample(char_set*6, 6))
+                print pwd
                 filedir = os.getcwd() + "/users/"
-                Users(email=fb_email,username=body['username'],photo=filedir + "sabi.jpg",password=pwd).save()
+                Users(email=fb_email,username=body['username'],photo=filedir + "sabi.jpeg",password=pwd).save()
             userInfo = userViews.retrieveUserInfo(email,True)
             return JsonResponse(userInfo)
+        password = body['password']
 	if 'self' in body:
 	    isSelf=True
 	else:
