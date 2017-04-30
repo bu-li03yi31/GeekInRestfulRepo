@@ -97,8 +97,11 @@ def createNewPost(request):
         os.makedirs(os.path.dirname(filename))
         data.save()
         for image in images:
-            with open( filename+ str(i) + ".jpg", 'wb') as f:
+            with open(filename+ str(i) + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
+            if i == 0:
+                cover=Image.open(filename+ str(i) + ".jpg")
+                cover.resize((200,200)).save(filename+"cover.jpg", format="JPEG", quality=70)
             i = i + 1
         
         tag_list=body['tags'].encode('utf-8')[1:-1].split(',')
@@ -196,7 +199,7 @@ def searchPosts(request):
         rows = cursor.fetchall()
         res = []
         for row in rows:
-            p_path=row[5]+'0.jpg'
+            p_path=row[5]+'cover.jpg'
             u_path=row[4]
             with open(p_path,'rb') as imageFile:
                 p_img=base64.b64encode(imageFile.read())
@@ -226,7 +229,7 @@ def getTrends(request):
         rows = cursor.fetchall()
         res = []
         for row in rows:
-            p_path=row[2]+'0.jpg'
+            p_path=row[2]+'cover.jpg'
             u_path=row[4]
             with open(p_path,'rb') as imageFile:
                 p_img=base64.b64encode(imageFile.read())
@@ -253,7 +256,7 @@ def getPosts(request):
         for row in rows:
             username=row[1]
             title=row[2]
-            path=row[3]+'/0.jpg'
+            path=row[3]+'/cover.jpg'
             with open(path,'rb') as imageFile:
                 p_img=base64.b64encode(imageFile.read())
             path=row[0]

@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.db.models import Count
 from django.db import connection
 from django.core import serializers
-
+from PIL import Image
 
 #Remove a following relationship
 @csrf_exempt
@@ -57,10 +57,8 @@ def getProfile(request):
 	else:
 	    self = None
 	user_info = retrieveUserInfo(body['email'],self)
-	#print(user_info)
 	return JsonResponse(user_info)
     except Exception as e:
-	#print('no')
         return JsonResponse({'result': False, 'message': 'error in getProfile: ' + str(e)})
 
 # use email address and self info to retrieve user info
@@ -110,6 +108,9 @@ def createUser(request):
             filedir = os.getcwd() + "/users/"
             with open(filedir + email + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
+            tmp=Image.open(filedir + email + ".jpg")
+            tmp.thumbnail((110,110),Image.ANTIALIAS)
+            tmp.save(filedir+email+".jpg", format="JPEG", quality=70)
             data = Users(email=body["email"],password=body["password"],photo=filedir + email + ".jpg",username=body["username"])
             data.save()
             return JsonResponse({'result': True})
@@ -155,7 +156,7 @@ def getNotifications(request):
             date=row[3]
             u_path=row[4]
             pid=row[5]
-            p_path=row[6]+'0.jpg'
+            p_path=row[6]+'cover.jpg'
             with open(u_path,'rb') as imageFile:
                 u_img=base64.b64encode(imageFile.read())
             with open(p_path,'rb') as imageFile:
@@ -172,7 +173,7 @@ def getNotifications(request):
             date=row[3]
             u_path=row[4]
             pid=row[5]
-            p_path=row[6]+'0.jpg'
+            p_path=row[6]+'cover.jpg'
             with open(u_path,'rb') as imageFile:
                 u_img=base64.b64encode(imageFile.read())
             with open(p_path,'rb') as imageFile:
