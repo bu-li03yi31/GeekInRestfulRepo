@@ -101,7 +101,9 @@ def createNewPost(request):
                 f.write(base64.b64decode(image))
             if i == 0:
                 cover=Image.open(filename+ str(i) + ".jpg")
-                cover.resize((250,250)).save(filename+"cover.jpg", format="JPEG", quality=70)
+                cover.thumbnail((250,250),Image.ANTIALIAS)
+                cover.save(filename+"cover.jpg", format="JPEG", quality=70)
+                #cover.resize((250,250)).save(filename+"cover.jpg", format="JPEG", quality=70)
             i = i + 1
         
         tag_list=body['tags'].encode('utf-8')[1:-1].split(',')
