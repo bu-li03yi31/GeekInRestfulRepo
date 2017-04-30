@@ -3,7 +3,7 @@
 
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
-from GeekInRest.models import Users, Posts, UserTags, Tags, Likes, Posts, Comments
+from GeekInRest.models import Users, Posts, UserTags, Tags, Likes, Posts, Comments, PostTags
 from GeekInRest.serializers import UserSerializer, PostSerializer
 from rest_framework import viewsets
 import time
@@ -100,7 +100,11 @@ def createNewPost(request):
             with open( filename+ str(i) + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
             i = i + 1
-        PostTags(pid=int(data.pid), tid=(body['tid'])).save()
+        
+        tag_list=body['tags'].encode('utf-8')[1:-1].split(',')
+        for t in tag_list:
+            t=t.strip()
+            PostTags(pid=Posts.objects.get(pid=data.pid), tid=Tags.objects.get(tid=int(t))).save()
         return JsonResponse({'result': True})
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in createNewPost: ' + str(e)})
@@ -216,9 +220,9 @@ def getTrends(request):
         cursor = connection.cursor()
         tid=int(body['tag'])
         if tid == 0:
-            cursor.execute("select Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+6))
+            cursor.execute("select Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6*page+6))
         else:
-            cursor.execute("select p.Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Post_Tags t, Users u where p.Email=u.Email and  p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp ASC limit "+str(6*page)+","+str(6*page+6))
+            cursor.execute("select p.Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Post_Tags t, Users u where p.Email=u.Email and p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6*page+6))
         rows = cursor.fetchall()
         res = []
         for row in rows:

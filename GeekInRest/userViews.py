@@ -104,7 +104,6 @@ def createUser(request):
         email = body['email']
         userPassJudge = Users.objects.filter(email=email)
         image = body['image']
-	#print(image)
         if userPassJudge:
             return JsonResponse({'result': "false"})
         else:
