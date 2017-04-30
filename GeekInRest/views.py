@@ -88,21 +88,20 @@ def createNewPost(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-
         str_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
         user_email = Users.objects.get(email=body["email"])
         filename=os.getcwd()+"/posts/"+body["email"]+"_"+str_time+"/"
-        data = Posts(email=user_email, title=body["title"], content=body["content"],photo=filename)
+        data = Posts.objects.create(email=user_email, title=body["title"], content=body["content"],photo=filename)
         images = body["images"]
         i = 0
         os.makedirs(os.path.dirname(filename))
-
+        data.save()
         for image in images:
             # filename = os.path.join(dir, "/posts/"+str_time +"/"+ str(i) + ".jpg")
             with open( filename+ str(i) + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
             i = i + 1
-        print data.pk
+        print data.pid
         return JsonResponse({'result': True})
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in createNewPost: ' + str(e)})
