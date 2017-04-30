@@ -74,7 +74,7 @@ def retrieveUserInfo(user,isSelf):
         # get photo path
         tmp=Users.objects.values('photo').filter(email=user).first()
         if not tmp:
-	    path = 'home/ubunt/GeekInProject/users/sabi.jpeg'
+	    path = 'home/ubunt/GeekInProject/users/pikachu.jpg'
 	else:
 	    path = tmp.get('photo')
 	#encode the image

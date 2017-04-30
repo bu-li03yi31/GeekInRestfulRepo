@@ -53,7 +53,7 @@ def login(request):
                 pwd=''.join(random.sample(char_set*6, 6))
                 print pwd
                 filedir = os.getcwd() + "/users/"
-                Users(email=fb_email,username=body['username'],photo=filedir + "sabi.jpeg",password=pwd).save()
+                Users(email=fb_email,username=body['username'],photo=filedir + "pikachu.jpg",password=pwd).save()
             userInfo = userViews.retrieveUserInfo(email,True)
             return JsonResponse(userInfo)
         password = body['password']
