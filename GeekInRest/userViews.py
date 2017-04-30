@@ -62,7 +62,7 @@ def getProfile(request):
         return JsonResponse({'result': False, 'message': 'error in getProfile: ' + str(e)})
 
 # use email address and self info to retrieve user info
-def retrieveUserInfo(user,self):
+def retrieveUserInfo(user,isSelf):
     try:
         user_name = Users.objects.filter(email=user).get(email=user).username
         # get follower number
@@ -82,8 +82,8 @@ def retrieveUserInfo(user,self):
 	    img = base64.b64encode(imageFile.read())
 
 	# send a dictionary include user infomation
-	if self != None:
-	    num_results = Following.objects.filter(follower =self,followee=user).count()
+	if isSelf != None:
+	    num_results = Following.objects.filter(follower=isSelf,followee=user).count()
             isFollowing = num_results
 	    user_info = str({'user_email':str(user),'user_name':str(user_name),'follower_count':countFollower,'followee_count':countFollowee,'post_count':countPost,'isFollowing':isFollowing,'photo':img})
 	    return {'result':True,'user_info':user_info}

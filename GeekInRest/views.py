@@ -21,6 +21,8 @@ import glob
 from django.utils import timezone
 import os
 from PIL import Image
+import random
+import string
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -43,18 +45,24 @@ def login(request):
         body = json.loads(json_str)
         email = body['email']
         password = body['password']
+        if 'facebook' in body:
+            fb_email=body['email']
+            fb_name=body['username']
+            count=Users.objects.filter(email=fb_email, username=fb_name).count()
+            if count == 0:
+                char_set=string.ascii_uppercase + string.digits
+                pwd=''.join(random.sample(char_set*6, 6))
+                filedir = os.getcwd() + "/users/"
+                Users(email=fb_email,username=body['username'],photo=filedir + "sabi.jpg",password=pwd).save()
+            userInfo = userViews.retrieveUserInfo(email,True)
+            return JsonResponse(userInfo)
 	if 'self' in body:
-	    self = True
+	    isSelf=True
 	else:
-	    self = False
+	    isSelf=False
         userIsLogedIn = Users.objects.filter(email=email, password=password)
         if userIsLogedIn:
-	    userInfo = userViews.retrieveUserInfo(email,self)
-	    if 'user_info' in userInfo:
-	        print('has user info')
-	    if 'message' in userInfo:
-		print(userInfo['message'])
-
+	    userInfo = userViews.retrieveUserInfo(email,isSelf)
 	    return JsonResponse(userInfo)
         else:
             return JsonResponse({'result': False,'message':'user haven\'t logged in'})
@@ -93,7 +101,7 @@ def createNewPost(request):
         filename=os.getcwd()+"/posts/"+body["email"]+"_"+str_time+"/"
         data = Posts.objects.create(email=user_email, title=body["title"], content=body["content"],photo=filename)
         images = body["images"]
-        i = 0
+	i = 0
         os.makedirs(os.path.dirname(filename))
         data.save()
         for image in images:
