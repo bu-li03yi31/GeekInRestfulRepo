@@ -203,10 +203,10 @@ def searchPosts(request):
         order=int(body['order'])
         cursor = connection.cursor()
         tmp = "%"+q+"%"
+        query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFt JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY tmp.Count DESC LIMIT "+str(6*page)+","+str(6*page+6)
         if order == 1:
-            cursor.execute("select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY TimeStamp ASC LIMIT "+str(6*page)+","+str(6*page+6))
-        elif order == 0:
-            cursor.execute("select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFt JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY tmp.Count DESC LIMIT "+str(6*page)+","+str(6*page+6))
+            query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY TimeStamp ASC LIMIT "+str(6*page)+","+str(6*page+6)
+        cursor.execute(query)
         rows = cursor.fetchall()
         res = []
         for row in rows:
@@ -233,10 +233,10 @@ def getTrends(request):
         page=int(body['page'])
         cursor = connection.cursor()
         tid=int(body['tag'])
-        if tid == 0:
-            cursor.execute("select Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6*page+6))
-        else:
-            cursor.execute("select p.Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Post_Tags t, Users u where p.Email=u.Email and p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6*page+6))
+        query="select Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6*page+6)
+        if tid != 0:
+            query="select p.Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Post_Tags t, Users u where p.Email=u.Email and p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6*page+6)
+        cursor.execute(query)
         rows = cursor.fetchall()
         res = []
         for row in rows:
