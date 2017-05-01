@@ -199,14 +199,23 @@ def searchPosts(request):
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
         page=int(body['page'])
-        q=body['keyword']
         order=int(body['order'])
         cursor = connection.cursor()
-        tmp = "%"+q+"%"
-        query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFt JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY tmp.Count DESC LIMIT "+str(6*page)+","+str(6)
+        q="%"+body['keyword']+"%"
+        query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFt JOIN Users u on p.Email = u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"
         if order == 1:
-            query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email = u.Email where Title LIKE '"+tmp+"' or Content LIKE '"+tmp+"' ORDER BY TimeStamp ASC LIMIT "+str(6*page)+","+str(6)
-        cursor.execute(query)
+            query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email=u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"
+        if 'pids' in body:
+            id_list = body['pids'][1:-1].split(',')
+            id_list = [t.strip() for t in id_list]
+            tmp=""
+            for t in id_list:
+                tmp= tmp+" and p.Pid <> "+t
+            query=query+tmp
+        order_sub_query=" ORDER BY Count DESC limit 0,"+str(6)
+        if order == 1:
+            order_sub_query=" ORDER BY TimeStamp DESC limit 0,"+str(6)
+        cursor.execute(query+order_sub_query)
         rows = cursor.fetchall()
         res = []
         for row in rows:
@@ -230,13 +239,21 @@ def getTrends(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        page=int(body['page'])
+        #page=int(body['page'])
         cursor = connection.cursor()
         tid=int(body['tag'])
-        query="select Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Users u where p.Email=u.Email ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6)
+        query="select p.Pid, p.Email, p.Photo, p.Title, u.Photo, u.Username from Posts p, Users u where p.Email=u.Email"
         if tid != 0:
-            query="select p.Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Post_Tags t, Users u where p.Email=u.Email and p.Pid=t.Pid and t.Tid="+str(tid)+" ORDER BY TimeStamp DESC limit "+str(6*page)+","+str(6)
-        cursor.execute(query)
+            query="select p.Pid, p.Email, p.Photo, Title, u.Photo, u.Username from Posts p, Post_Tags t, Users u where p.Email=u.Email and p.Pid=t.Pid and t.Tid="+str(tid)
+        if 'pids' in body:
+            id_list = body['pids'][1:-1].split(',')
+            id_list = [t.strip() for t in id_list]
+            tmp=""
+            for t in id_list:
+                tmp= tmp+" and p.Pid <> "+t
+            query=query+tmp
+        order_sub_query=" ORDER BY TimeStamp DESC limit "+str(0)+","+str(6)
+        cursor.execute(query + order_sub_query)
         rows = cursor.fetchall()
         res = []
         for row in rows:
