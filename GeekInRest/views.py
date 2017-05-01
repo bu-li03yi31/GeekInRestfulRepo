@@ -252,7 +252,7 @@ def getTrends(request):
             for t in id_list:
                 tmp= tmp+" and p.Pid <> "+t
             query=query+tmp
-        order_sub_query=" ORDER BY TimeStamp DESC limit "+str(0)+","+str(6)
+        order_sub_query=" ORDER BY TimeStamp DESC limit 0,"+str(6)
         cursor.execute(query + order_sub_query)
         rows = cursor.fetchall()
         res = []
