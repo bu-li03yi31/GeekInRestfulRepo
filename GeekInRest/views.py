@@ -110,7 +110,7 @@ def createNewPost(request):
                 f.write(base64.b64decode(image))
             if i == 0:
                 cover=Image.open(filename+ str(i) + ".jpg")
-                cover.thumbnail((250,250),Image.ANTIALIAS)
+                cover.thumbnail((300,300),Image.ANTIALIAS)
                 cover.save(filename+"cover.jpg", format="JPEG", quality=70)
                 #cover.resize((250,250)).save(filename+"cover.jpg", format="JPEG", quality=70)
             i = i + 1

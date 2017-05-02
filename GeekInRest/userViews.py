@@ -109,7 +109,7 @@ def createUser(request):
             with open(filedir + email + ".jpg", 'wb') as f:
                 f.write(base64.b64decode(image))
             tmp=Image.open(filedir + email + ".jpg")
-            tmp.thumbnail((120,120),Image.ANTIALIAS)
+            tmp.thumbnail((150,150),Image.ANTIALIAS)
             tmp.save(filedir+email+".jpg", format="JPEG", quality=70)
             data = Users(email=body["email"],password=body["password"],photo=filedir + email + ".jpg",username=body["username"])
             data.save()
