@@ -51,7 +51,6 @@ def login(request):
             if count == 0:
                 char_set=string.ascii_uppercase + string.digits
                 pwd=''.join(random.sample(char_set*6, 6))
-                print pwd
                 filedir = os.getcwd() + "/users/"
                 Users(email=fb_email,username=body['username'],photo=filedir + "pikachu.jpg",password=pwd).save()
             userInfo = userViews.retrieveUserInfo(email,True)
@@ -112,7 +111,6 @@ def createNewPost(request):
                 cover=Image.open(filename+ str(i) + ".jpg")
                 cover.thumbnail((300,300),Image.ANTIALIAS)
                 cover.save(filename+"cover.jpg", format="JPEG", quality=70)
-                #cover.resize((250,250)).save(filename+"cover.jpg", format="JPEG", quality=70)
             i = i + 1
         
         tag_list=body['tags'].encode('utf-8')[1:-1].split(',')
@@ -174,7 +172,15 @@ def getComments(request):
         body = json.loads(json_str)
         pid=int(body['pid'])
         cursor = connection.cursor()
-        cursor.execute('select p.Pid, u.Username, u.Photo, c.Email, c.Content, DATE_FORMAT(c.TimeStamp,"%m-%d %H:%i") from Users u, Comments c, Posts p where p.Pid=c.Pid and u.Email=c.Email and p.Pid=' + str(pid))
+        tmp=""
+        if 'cids' in body:
+            id_list = body['cids'][1:-1].split(',')
+            id_list = [t.strip() for t in id_list]
+            for t in id_list:
+                tmp=tmp+" and c.Cid <> "+t
+        query='select p.Pid, u.Username, u.Photo, c.Email, c.Content, DATE_FORMAT(c.TimeStamp,"%m-%d %H:%i"), c.Cid from Users u, Comments c, Posts p where p.Pid=c.Pid and u.Email=c.Email and p.Pid='+str(pid)+tmp+" limit 0,6"
+        print query
+        cursor.execute(query)
         rows = cursor.fetchall()
         res = []
         for row in rows:
@@ -183,9 +189,11 @@ def getComments(request):
             user_email=row[3]
             content=row[4]
             date=row[5]
+            cid=row[6]
+            print cid
             with open(path,'rb') as imageFile:
                 img=base64.b64encode(imageFile.read())
-            res.append({'username':username, 'user_photo':img, 'content':content, 'date':date, 'email':user_email})
+            res.append({'cid':int(cid),'username':username, 'user_photo':img, 'content':content, 'date':date, 'email':user_email})
         json_object = {'data': res, 'result': True}
         cursor.close()
         return JsonResponse(json_object)
@@ -210,10 +218,10 @@ def searchPosts(request):
             for t in id_list:
                 tmp=tmp+" and p.Pid <> "+t
         #append queries
-        query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFT JOIN Users u on p.Email = u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"+tmp+" ORDER BY Count DESC limit 0,"+str(6)
+        query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid"+tmp+" group by p.Pid) as tmp on p.Pid=tmp.Pid LEFT JOIN Users u on p.Email = u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'ORDER BY Count DESC limit 0,"+str(6)
         if order == 1:
             query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email=u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"+tmp+" ORDER BY TimeStamp DESC limit 0,"+str(6)
-       
+        print q
         cursor.execute(query)
         rows = cursor.fetchall()
         res = []
@@ -275,11 +283,17 @@ def getPosts(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
-        page=int(body['page'])
+        #page=int(body['page'])
+        tmp=""
+        if 'pids' in body:
+            id_list = body['pids'][1:-1].split(',')
+            id_list = [t.strip() for t in id_list]
+            for t in id_list:
+                tmp=tmp+" and p.Pid <> "+t
         cursor = connection.cursor()
-        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo, p.Pid  from Users u, Posts p where u.Email=p.Email and u.Email="'+body['email']+'" limit '+str(6*page)+','+str(6))
+        cursor.execute('select u.Photo as u_photo, u.Username, p.Title, p.Photo as p_photo, p.Pid from Users u, Posts p where u.Email=p.Email'+tmp+' and u.Email="'+body['email']+'" limit 0,6')
         rows=cursor.fetchall()
-        res = []
+        res=[]
         for row in rows:
             username=row[1]
             title=row[2]
@@ -312,7 +326,7 @@ def getPostDetail(request):
 	# get the path of photos of the post
 	post_photo_path = post_object.photo
 	post_photo_list = getPhotoList(post_photo_path)[:-1]
-        print(post_photo_list)
+        
 	# path to user profile photo
 	path = Users.objects.values('photo').filter(email=user_email).first().get('photo')
         isLiked = Likes.objects.filter(pid=post_object, email=Users.objects.get(email=body['email'])).count()
@@ -333,7 +347,7 @@ def getPostImage(request):
 	    return HttpResponse(img.read(),content_type="image/jpg")
     except IOError:
 	# if we cannot find target image, create one using PIL
-        red  = Image.new('RGBA',(1,1),(255,0,0))
+        red = Image.new('RGBA',(1,1),(255,0,0))
         response = HttpResponse(content_type="image/jpg")
         red.save(response,"JPEG")
         return response

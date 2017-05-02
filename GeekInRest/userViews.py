@@ -99,6 +99,8 @@ def createUser(request):
     try:
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
+	#if 'password' not in body:
+	#    print('has password')
         email = body['email']
         userPassJudge = Users.objects.filter(email=email)
         image = body['image']
@@ -115,7 +117,8 @@ def createUser(request):
             data.save()
             return JsonResponse({'result': True})
     except Exception as e:
-        print str(e)
+	#print('fail')
+        #print str(e)
         return JsonResponse({'result': False, 'message': 'error in createUser: ' + str(e)})
 
 #Get all followers of one user
