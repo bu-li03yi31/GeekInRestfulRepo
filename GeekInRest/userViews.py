@@ -125,11 +125,15 @@ def getFollowers(request):
         json_str = ((request.body).decode('utf-8'))
         body = json.loads(json_str)
         cursor = connection.cursor()
-        cursor.execute('select u.Photo, u.Username, u.Email from Following f, Users u where f.Follower = u.email and f.Followee = "' + body['email'] + '"')
+        cursor.execute('select u.Photo, u.Username, u.Email from Following f, Users u where f.Follower=u.email and f.Followee="'+body['email']+'"')
         rows = cursor.fetchall()
         result = []
-        keys = ('photo','username', 'email')
+        keys = ('user_photo','username', 'email')
         for row in rows:
+	    row = [str(r) for r in row]
+            print(row)
+            with open(row[0],'rb') as imageFile:
+                row[0] = base64.b64encode(imageFile.read())
             result.append(dict(zip(keys,row)))
         json_object = {'data': result, 'result': True}
         cursor.close()
@@ -137,6 +141,28 @@ def getFollowers(request):
     except Exception as e:
         return JsonResponse({'result': False, 'message': 'error in getFollowers: ' + str(e)})
 
+
+@csrf_exempt
+def getFollowee(request):
+    try:
+	json_str = ((request.body).decode('utf-8'))
+	body = json.loads(json_str)
+	cursor = connection.cursor()
+	print(body['email'])
+	cursor.execute('select u.Photo, u.Username, u.Email from Following f, Users u where f.Followee=u.email and f.Follower="' + body['email'] + '"')
+	rows = cursor.fetchall()
+	result = []
+	keys = ('user_photo','username','email')
+	for row in rows:
+	    row = [str(r) for r in row]
+	    with open(row[0],'rb') as imageFile:
+                row[0] = base64.b64encode(imageFile.read())
+	    result.append(dict(zip(keys,row)))
+	json_object = {'data':result, 'result': True }
+	cursor.close()
+	return JsonResponse(json_object)
+    except Exception as e:
+	return JsonResponse({'result': False, 'message': 'error in getFollowees: ' + str(e)})
 
 #Get Notifications
 @csrf_exempt

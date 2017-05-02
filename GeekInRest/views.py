@@ -202,20 +202,19 @@ def searchPosts(request):
         order=int(body['order'])
         cursor = connection.cursor()
         q="%"+body['keyword']+"%"
-        query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFt JOIN Users u on p.Email = u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"
-        if order == 1:
-            query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email=u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"
+        tmp=""
+        #get exclude pid list
         if 'pids' in body:
             id_list = body['pids'][1:-1].split(',')
             id_list = [t.strip() for t in id_list]
-            tmp=""
             for t in id_list:
-                tmp= tmp+" and p.Pid <> "+t
-            query=query+tmp
-        order_sub_query=" ORDER BY Count DESC limit 0,"+str(6)
+                tmp=tmp+" and p.Pid <> "+t
+        #append queries
+        query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo, tmp.Count from Posts p LEFT JOIN (select p.Pid, count(l.Email)as Count from Posts p, Likes l where p.Pid=l.pid group by p.Pid) as tmp on p.Pid=tmp.Pid LEFT JOIN Users u on p.Email = u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"+tmp+" ORDER BY Count DESC limit 0,"+str(6)
         if order == 1:
-            order_sub_query=" ORDER BY TimeStamp DESC limit 0,"+str(6)
-        cursor.execute(query+order_sub_query)
+            query="select p.Title, p.Pid, u.Email, u.Username, u.Photo, p.Photo from Posts p LEFT JOIN Users u on p.Email=u.Email where Title LIKE '"+q+"' or Content LIKE '"+q+"'"+tmp+" ORDER BY TimeStamp DESC limit 0,"+str(6)
+       
+        cursor.execute(query)
         rows = cursor.fetchall()
         res = []
         for row in rows:
@@ -313,7 +312,7 @@ def getPostDetail(request):
 	# get the path of photos of the post
 	post_photo_path = post_object.photo
 	post_photo_list = getPhotoList(post_photo_path)[:-1]
-        #print(post_photo_list)
+        print(post_photo_list)
 	# path to user profile photo
 	path = Users.objects.values('photo').filter(email=user_email).first().get('photo')
         isLiked = Likes.objects.filter(pid=post_object, email=Users.objects.get(email=body['email'])).count()

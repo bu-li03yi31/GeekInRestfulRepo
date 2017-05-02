@@ -33,6 +33,7 @@ urlpatterns = [
     url(r'^profile/', userViews.getProfile),
     url(r'^addComment/', views.addComment),
     url(r'^getFollowers/', userViews.getFollowers),
+    url(r'^getFollowings/',userViews.getFollowee),
     url(r'^getNotifications/', userViews.getNotifications),
     url(r'^getComments/', views.getComments),
     url(r'^getPosts/', views.getPosts),
