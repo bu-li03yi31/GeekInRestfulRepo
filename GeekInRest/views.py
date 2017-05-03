@@ -114,7 +114,7 @@ def createNewPost(request):
             else:
                 pic=Image.open(filename+ str(i) + ".jpg")
                 pic.thumbnail((900,900),Image.ANTIALIAS)
-                cover.save(filename+str(i)+".jpg", format="JPEG", quality=70)
+                pic.save(filename+str(i)+".jpg", format="JPEG", quality=70)
             i = i + 1
         
         tag_list=body['tags'].encode('utf-8')[1:-1].split(',')
