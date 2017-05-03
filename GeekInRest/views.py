@@ -111,6 +111,10 @@ def createNewPost(request):
                 cover=Image.open(filename+ str(i) + ".jpg")
                 cover.thumbnail((300,300),Image.ANTIALIAS)
                 cover.save(filename+"cover.jpg", format="JPEG", quality=70)
+            else:
+                pic=Image.open(filename+ str(i) + ".jpg")
+                pic.thumbnail((900,900),Image.ANTIALIAS)
+                cover.save(filename+str(i)+".jpg", format="JPEG", quality=70)
             i = i + 1
         
         tag_list=body['tags'].encode('utf-8')[1:-1].split(',')
@@ -266,8 +270,12 @@ def getTrends(request):
         for row in rows:
             p_path=row[2]+'cover.jpg'
             u_path=row[4]
-            with open(p_path,'rb') as imageFile:
-                p_img=base64.b64encode(imageFile.read())
+            try:
+                with open(p_path,'rb') as imageFile:
+                    p_img=base64.b64encode(imageFile.read())
+            except (OSError, IOError) as e:
+                with open('/home/ubuntu/GeekInProject/default/cover.jpg','rb') as imageFile:
+                    p_img=base64.b64encode(imageFile.read())
             with open(u_path,'rb') as imageFile:
                 u_img=base64.b64encode(imageFile.read())
             res.append({'pid':int(row[0]), 'email':row[1], 'title':row[3], 'post_cover':p_img, 'user_photo':u_img, 'username':row[5]})
